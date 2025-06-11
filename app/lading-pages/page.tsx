@@ -50,7 +50,7 @@ export default function CalculatorPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Estima el costo de tu próximo proyecto de diseño web de manera rápida y transparente.
+              Estima el costo de tu próximo proyecto de diseño web de manera rápida y transparente
             </motion.p>
           </section>
 
