@@ -75,7 +75,7 @@ const formatUSD = (n: number): string => {
 }
 
 export default function PriceCalculator() {
-  const [hourRate, setHourRate] = useState(17)
+  const [hourRate, setHourRate] = useState(21)
   const [calculatedPrices, setCalculatedPrices] = useState<
     Array<{
       type: string
