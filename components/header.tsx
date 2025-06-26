@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useCallback } from "react"
 import { Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 const navItems = [
   { href: "#inicio", label: "Inicio" },
@@ -17,69 +15,69 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+  const handleScroll = useCallback(() => {
+    const scrolled = window.scrollY > 20
+    if (scrolled !== isScrolled) {
+      setIsScrolled(scrolled)
     }
+  }, [isScrolled])
 
-    window.addEventListener("scroll", handleScroll)
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [handleScroll])
 
-  const scrollToSection = (href: string) => {
+  const scrollToSection = useCallback((href: string) => {
     const element = document.querySelector(href)
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
+      const headerHeight = 80
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offsetPosition = elementPosition - headerHeight
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      })
       setIsMobileMenuOpen(false)
     }
-  }
+  }, [])
 
   return (
-    <motion.header
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-lg" : "bg-transparent"
+        isScrolled ? "bg-black/90 backdrop-blur-md shadow-lg border-b border-white/10" : "bg-transparent"
       }`}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+      <div className="container-custom">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <motion.div className="flex-shrink-0" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <h1 className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-[#ff6600] to-[#ff1493] bg-clip-text text-transparent">
-              Limitless Agency
-            </h1>
-          </motion.div>
+          <div className="flex-shrink-0">
+            <h1 className="text-2xl lg:text-3xl font-black text-gradient">Limitless Agency</h1>
+          </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8" role="navigation" aria-label="Navegación principal">
+          <nav className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) => (
-              <motion.button
+              <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="text-white hover:text-[#ff6600] font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#ff6600] focus:ring-offset-2 rounded-md px-2 py-1"
-                whileHover={{ y: -2 }}
-                whileTap={{ y: 0 }}
+                className="text-white hover:text-orange-400 font-medium transition-colors duration-200 focus-visible px-2 py-1 rounded-md"
               >
                 {item.label}
-              </motion.button>
+              </button>
             ))}
           </nav>
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button
-              onClick={() => scrollToSection("#contacto")}
-              className="bg-gradient-to-r from-[#ff6600] to-[#ff1493] hover:from-[#e55a00] hover:to-[#e6127a] text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            >
+            <button onClick={() => scrollToSection("#contacto")} className="btn-primary">
               ¡Hablemos!
-            </Button>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 rounded-md text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="lg:hidden p-2 rounded-md text-white hover:text-orange-400 focus-visible"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Abrir menú de navegación"
           >
@@ -89,35 +87,24 @@ export default function Header() {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="px-4 py-6 space-y-4">
-              {navItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium py-2 transition-colors duration-200"
-                >
-                  {item.label}
-                </button>
-              ))}
-              <Button
-                onClick={() => scrollToSection("#contacto")}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 rounded-full mt-4"
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-black/95 backdrop-blur-md border-t border-white/10">
+          <div className="container-custom py-6 space-y-4">
+            {navItems.map((item) => (
+              <button
+                key={item.href}
+                onClick={() => scrollToSection(item.href)}
+                className="block w-full text-left text-white hover:text-orange-400 font-medium py-2 transition-colors duration-200"
               >
-                ¡Hablemos!
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+                {item.label}
+              </button>
+            ))}
+            <button onClick={() => scrollToSection("#contacto")} className="btn-primary w-full mt-4">
+              ¡Hablemos!
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
   )
 }

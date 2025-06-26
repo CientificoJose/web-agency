@@ -1,160 +1,91 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Code, Palette, Rocket } from "lucide-react"
+import { useCallback } from "react"
+import { ArrowRight, Rocket } from "lucide-react"
+import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 
 export default function Hero() {
-  const scrollToSection = (href: string) => {
+  const { ref: heroRef, isVisible } = useScrollAnimation({ threshold: 0.2 })
+
+  const scrollToSection = useCallback((href: string) => {
     const element = document.querySelector(href)
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
-  }
+      const headerHeight = 80
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offsetPosition = elementPosition - headerHeight
 
-  const floatingIcons = [
-    { Icon: Code, delay: 0, x: 100, y: 50 },
-    { Icon: Palette, delay: 0.5, x: -80, y: 80 },
-    { Icon: Rocket, delay: 1, x: 120, y: -60 },
-  ]
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      })
+    }
+  }, [])
 
   return (
-    <section id="inicio" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Animated Background */}
+    <section
+      id="inicio"
+      ref={heroRef}
+      className="section min-h-screen flex items-center justify-center relative overflow-hidden pt-20"
+    >
+      {/* Background gradients estáticos */}
       <div className="absolute inset-0 -z-10">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#ff6600]/30 to-[#ff1493]/30 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-[#ff1493]/30 to-[#ff6600]/30 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [360, 180, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-        />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-pink-500/20 to-orange-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-custom">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
-          <motion.div
-            className="text-center lg:text-left"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.h1
-              className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 leading-tight"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <span className="bg-gradient-to-r from-[#ff6600] via-[#ff1493] to-[#ff6600] bg-clip-text text-transparent">
-                MENTES CREATIVAS,
-              </span>
+          <div className={`text-center lg:text-left ${isVisible ? "animate-fade-in-left" : "animate-on-scroll"}`}>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 leading-tight">
+              <span className="text-gradient">MENTES CREATIVAS,</span>
               <br />
-              <span className="bg-gradient-to-r from-[#ff1493] via-[#ff6600] to-[#ff1493] bg-clip-text text-transparent">
-                OBRAS CREATIVAS
-              </span>
-            </motion.h1>
+              <span className="text-gradient">OBRAS CREATIVAS</span>
+            </h1>
 
-            <motion.p
-              className="text-xl sm:text-2xl text-slate-600 dark:text-slate-300 mb-8 font-medium"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              No Hay Límites para Crear
-            </motion.p>
+            <p className="text-xl sm:text-2xl text-gray-300 mb-8 font-medium">No Hay Límites para Crear</p>
 
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              <Button
-                onClick={() => scrollToSection("#contacto")}
-                size="lg"
-                className="bg-gradient-to-r from-[#ff6600] to-[#ff1493] hover:from-[#e55a00] hover:to-[#e6127a] text-white font-semibold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-              >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button onClick={() => scrollToSection("#contacto")} className="btn-primary group">
                 Cuéntame tu proyecto
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </button>
+              <button
                 onClick={() => scrollToSection("#portafolio")}
-                variant="outline"
-                size="lg"
-                className="border-2 border-[#ff6600] text-[#ff6600] hover:bg-gradient-to-r hover:from-[#ff6600] hover:to-[#ff1493] hover:text-white hover:border-transparent font-semibold px-8 py-4 rounded-full transition-all duration-300"
+                className="border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300"
               >
                 Ver Portafolio
-              </Button>
-            </motion.div>
-          </motion.div>
+              </button>
+            </div>
+          </div>
 
-          {/* Illustration */}
-          <motion.div
-            className="relative flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
+          {/* Illustration - Sin animaciones flotantes */}
+          <div
+            className="relative flex items-center justify-center w-[300px] h-[300px]"
           >
-            {/* Central Astronaut */}
-            <motion.div
-              className="relative z-10 w-64 h-64 bg-gradient-to-br from-[#ff6600] to-[#ff1493] rounded-full flex items-center justify-center shadow-2xl"
-              animate={{ y: [-10, 10, -10] }}
-              transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-            >
-              <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <Rocket className="w-16 h-16 text-white" />
+            {/* Círculo principal con el cohete */}
+            <div className={`absolute z-10 ${isVisible ? 'animate-float animate-scale-in' : 'animate-scale-out'}`}>
+              <div className="relative w-64 h-64 gradient-primary rounded-full flex items-center justify-center shadow-2xl">
+                <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Rocket className="w-16 h-16 text-white" />
+                </div>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Floating Icons */}
-            {floatingIcons.map(({ Icon, delay }, index) => (
-              <motion.div
-                key={index}
-                className={`absolute w-16 h-16 ${
-                  index % 2 === 0
-                    ? "bg-gradient-to-br from-[#ff6600]/80 to-[#ff1493]/80"
-                    : "bg-gradient-to-br from-[#ff1493]/80 to-[#ff6600]/80"
-                } backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg`}
-                style={{
-                  left: index === 0 ? "70%" : index === 1 ? "10%" : "75%",
-                  top: index === 0 ? "20%" : index === 1 ? "60%" : "80%",
-                }}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: [0, -20, 0],
-                  rotate: [0, 360],
-                }}
-                transition={{
-                  opacity: { duration: 0.5, delay },
-                  scale: { duration: 0.5, delay },
-                  y: { duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay },
-                  rotate: { duration: 10, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
-                }}
-              >
-                <Icon className="w-8 h-8 text-white" />
-              </motion.div>
-            ))}
-          </motion.div>
+            {/* Elemento decorativo 1 (Laptop) */}
+            <div className={`absolute top-0 right-0 ${isVisible ? 'animate-float-slow animate-slide-down' : 'animate-slide-out-up'}`}>
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/80 to-pink-500/80 rounded-2xl shadow-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">💻</span>
+              </div>
+            </div>
+
+            {/* Elemento decorativo 2 (Cohete) */}
+            <div className={`absolute bottom-0 left-0 ${isVisible ? 'animate-float-fast animate-slide-up' : 'animate-slide-out-down'}`}>
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-500/80 to-orange-500/80 rounded-2xl shadow-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">🚀</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -18,7 +18,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Roboto", "Inter", "system-ui", "sans-serif"],
       },
       colors: {
         primary: {
@@ -32,6 +32,7 @@ const config: Config = {
           700: "#c2410c",
           800: "#9a3412",
           900: "#7c2d12",
+          DEFAULT: "#ff6600",
         },
         secondary: {
           50: "#fdf2f8",
@@ -44,6 +45,7 @@ const config: Config = {
           700: "#be185d",
           800: "#9d174d",
           900: "#831843",
+          DEFAULT: "#ff1493",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -58,10 +60,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
+        accent: '#ffc700',
+        light: '#fff4ec',
+        dark: '#4d2d00',
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -83,13 +84,19 @@ const config: Config = {
       },
       animation: {
         float: "float 6s ease-in-out infinite",
+        "float-slow": "float 8s ease-in-out infinite",
+        "float-fast": "float 4s ease-in-out infinite",
         glow: "glow 2s ease-in-out infinite alternate",
         wave: "wave 3s ease-in-out infinite",
         tilt: "tilt 10s infinite linear",
         "fade-in": "fadeIn 0.5s ease-in-out",
+        "fade-out": "fadeOut 0.5s ease-out forwards",
         "slide-up": "slideUp 0.5s ease-out",
+        "slide-out-up": "slideOutUp 0.5s ease-out forwards",
         "slide-down": "slideDown 0.5s ease-out",
+        "slide-out-down": "slideOutDown 0.5s ease-out forwards",
         "scale-in": "scaleIn 0.3s ease-out",
+        "scale-out": "scaleOut 0.3s ease-out forwards",
         gradient: "gradient 3s ease infinite",
         halo: "halo 35s ease-in-out infinite alternate",
       },
@@ -134,6 +141,22 @@ const config: Config = {
         halo: {
           "0%,100%": { transform: "translate(-20%,-20%) scale(1)" },
           "50%": { transform: "translate(20%,20%) scale(1.2)" },
+        },
+        fadeOut: {
+          "from": { opacity: "1" },
+          "to": { opacity: "0" },
+        },
+        scaleOut: {
+          "from": { transform: "scale(1)", opacity: "1" },
+          "to": { transform: "scale(0.9)", opacity: "0" },
+        },
+        slideOutUp: {
+          "from": { transform: "translateY(0)", opacity: "1" },
+          "to": { transform: "translateY(-20px)", opacity: "0" },
+        },
+        slideOutDown: {
+          "from": { transform: "translateY(0)", opacity: "1" },
+          "to": { transform: "translateY(20px)", opacity: "0" },
         },
       },
       backgroundImage: {

@@ -75,7 +75,7 @@ const formatUSD = (n: number): string => {
 }
 
 export default function PriceCalculator() {
-  const [hourRate, setHourRate] = useState(21)
+  const [hourRate, setHourRate] = useState(22)
   const [calculatedPrices, setCalculatedPrices] = useState<
     Array<{
       type: string
@@ -194,12 +194,12 @@ export default function PriceCalculator() {
 
             {/* Features */}
             <div className="space-y-3 mb-6 hide-scrollbar" style={{ overflow: "visible" }}>
-              {/* {plan.features.map((feature, featureIndex) => (
+              {plan.features.map((feature, featureIndex) => (
                 <div key={featureIndex} className="flex items-center gap-2 text-sm">
                   <Check className="w-4 h-4 text-[#ff6600] flex-shrink-0" />
                   <span className="text-white/80">{feature}</span>
                 </div>
-              ))} */}
+              ))}
             </div>
 
             {/* CTA Button */}
