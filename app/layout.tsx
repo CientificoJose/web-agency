@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: "Limitless Agency - Mentes Creativas, Obras Creativas",
   description:
     "Agencia de desarrollo de software especializada en crear experiencias digitales excepcionales. No hay límites para crear.",
+  icons: {
+    icon: "/favicon.ico",
+  },
   keywords: "desarrollo web, aplicaciones móviles, React, Next.js, TypeScript, diseño web, Venezuela",
   authors: [{ name: "José Nieves", url: "https://sinlimites-agency.online" }],
   openGraph: {

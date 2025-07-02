@@ -47,10 +47,10 @@ const services = [
   },
   {
     icon: MessageSquare,
-    title: "Chat Bot",
+    title: "Asistente Virtual",
     description:
       "Diseñamos chatbots inteligentes que automatizan la atención al cliente, mejoran la experiencia del usuario y aumentan la eficiencia operativa de tu negocio.",
-    price: "Desde $150",
+    price: "Desde $200",
     color: "from-cyan-500 to-blue-600",
   },
 ]
