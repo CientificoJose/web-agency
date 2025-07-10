@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Script from 'next/script';
 import Image from 'next/image';
 
@@ -15,13 +15,7 @@ const MermaidDiagram = ({ chart }: { chart: string }) => {
 };
 
 export default function JgStoreProposalPage() {
-  const [currentDate, setCurrentDate] = useState('');
-
   useEffect(() => {
-    const now = new Date();
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    setCurrentDate(now.toLocaleDateString('es-ES', options));
-
     if (typeof window !== 'undefined' && window.mermaid) {
       window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
       window.mermaid.contentLoaded();
@@ -73,7 +67,7 @@ export default function JgStoreProposalPage() {
             <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
               <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Cliente</h3>
               <p className="text-gray-700 text-sm md:text-base">Gabriel Saad</p>
-              <p className="text-gray-700 text-sm md:text-base">Fecha: <span id="current-date">{currentDate}</span></p>
+              <p className="text-gray-700 text-sm md:text-base">Fecha: 10 de julio de 2025</p>
             </div>
           </div>
           
