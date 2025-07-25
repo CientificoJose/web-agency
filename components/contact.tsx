@@ -232,7 +232,7 @@ export default function Contact() {
             <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
               <div className="flex items-center space-x-4 mb-6">
                 <div className="relative w-16 h-16 rounded-full overflow-hidden">
-                  <Image src="/placeholder.svg?height=64&width=64" alt="José Nieves" fill className="object-cover" />
+                  <Image src="/images/jose-profile.jpg" alt="José Nieves" fill className="object-cover" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">José Nieves</h3>

@@ -194,6 +194,14 @@ export default function JgStoreProposalPage() {
                   <li>Equivalente en USD: <strong>$32.98</strong></li>
                 </ul>
               </div>
+              <div className="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg">
+                <p className="font-semibold text-sm md:text-base">Abono recibido el 23/07/2025.</p>
+                <ul className="list-disc pl-5 mt-2 text-sm md:text-base">
+                  <li>Monto en Bolívares: <strong>4.860,00 Bs.</strong></li>
+                  <li>Tasa de Cambio (USDT): <strong>160,40 Bs.</strong></li>
+                  <li>Equivalente en USD: <strong>$30.30</strong></li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -204,13 +212,15 @@ export default function JgStoreProposalPage() {
               <div className="bg-blue-50 rounded-lg p-4 md:p-5 text-center">
                 <h4 className="font-medium text-dark mb-2 md:mb-3">Primer Pago</h4>
                 <div className="text-xl md:text-2xl font-bold text-primary mb-2">$63.33</div>
-                <p className="text-sm text-green-600 font-medium">Abonado: $62.86</p>
-                <p className="text-sm text-red-600 font-medium">Restante: $0.47</p>
+                <p className="text-sm text-green-600 font-medium">Abonado: $63.33</p>
+                <p className="text-sm text-green-600 font-medium">Pagado</p>
                 <p className="text-xs md:text-sm text-gray-600 mt-2">1. Implementación de Mejoras al Sistema de Scrapping</p>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 md:p-5 text-center">
                 <h4 className="font-medium text-dark mb-2 md:mb-3">Segundo Pago</h4>
                 <div className="text-xl md:text-2xl font-bold text-primary mb-2">$63.33</div>
+                <p className="text-sm text-green-600 font-medium">Abonado: $29.83</p>
+                <p className="text-sm text-red-600 font-medium">Restante: $33.50</p>
                 <p className="text-xs md:text-sm text-gray-600 mt-2">2. Desarrollo del Sistema de Automatización</p>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 md:p-5 text-center">

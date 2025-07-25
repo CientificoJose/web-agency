@@ -68,7 +68,7 @@ export default function About() {
                 transition={{ duration: 0.3 }}
               >
                 <Image
-                  src="/placeholder.svg?height=500&width=400"
+                  src="/image-about.jpg"
                   alt="Equipo Limitless Agency"
                   fill
                   className="object-cover"
