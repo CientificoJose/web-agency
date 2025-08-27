@@ -24,7 +24,7 @@ export default function LivingTorchProposalPage() {
           {/* Header */}
           <div className="text-center pb-5 border-b-2 border-primary mb-6 md:mb-8 w-full">
             <Image
-              src="/placeholder-logo.png"
+              src="/recurso.png"
               alt="Logo Limitless Agency"
               width={128}
               height={128}
@@ -149,52 +149,6 @@ export default function LivingTorchProposalPage() {
             </div>
           </div>
 
-          {/* Section 3: Requisitos Clave */}
-          <div className="bg-gray-50 rounded-lg p-4 md:p-6 mb-6">
-            <h3 className="text-base md:text-lg font-semibold text-dark mb-3">3. Requisitos Clave para el Desarrollador (Resumen Técnico)</h3>
-            <ul className="list-disc pl-5 text-gray-700 space-y-2 text-sm md:text-base">
-              <li>
-                <strong>Página de Registro:</strong> Formulario web simple y amigable para datos del asistente y Código de Acceso.
-              </li>
-              <li>
-                <strong>Generador de Códigos de Acceso:</strong> Herramienta interna para crear códigos únicos vinculados a una cantidad
-                específica de entradas.
-              </li>
-              <li>
-                <strong>Validación de Códigos:</strong> Verificación de autenticidad y uso único de cada código.
-              </li>
-              <li>
-                <strong>Generador de Códigos QR:</strong> Al completar el registro, generación de QR con la información necesaria para
-                la validación en la entrada.
-              </li>
-              <li>
-                <strong>Base de Datos de Asistentes:</strong> Panel para visualizar en tiempo real la lista de personas registradas.
-              </li>
-              <li>
-                <strong>Función de Exportación:</strong> Exportar la base de datos a Excel o CSV.
-              </li>
-              <li>
-                <strong>Módulo de Verificación (Check-in):</strong> Interfaz para el día del evento que permita escanear QR y/o búsqueda manual.
-              </li>
-            </ul>
-          </div>
-
-          {/* Section 4: Siguientes pasos para conciliar alcance */}
-          <div className="bg-gray-50 rounded-lg p-4 md:p-6 mb-6">
-            <h3 className="text-base md:text-lg font-semibold text-dark mb-3">4. Siguientes pasos para acordar el alcance</h3>
-            <p className="text-gray-700 mb-2 text-sm md:text-base">
-              Para afinar la propuesta formal, por favor confirmar o ajustar los siguientes puntos con el equipo de
-              LivingTorchProduction:
-            </p>
-            <ul className="list-disc pl-5 text-gray-700 space-y-2 text-sm md:text-base">
-              <li>¿Cada Código de Acceso está asociado a cuántas entradas? ¿Puede fraccionarse el uso en el check-in?</li>
-              <li>Formato preferido de la base de datos: ¿Google Sheets, Excel o base de datos propia en la nube?</li>
-              <li>¿Se requiere lector de QR desde cámara del dispositivo o se usará un escáner externo?</li>
-              <li>¿Se necesita historial de accesos y reporte de auditoría por asistente/código?</li>
-              <li>Idiomas de la plataforma y logotipos/colores del evento para personalización.</li>
-              <li>¿Cuántas personas usarán el panel de administración y con qué roles?</li>
-            </ul>
-          </div>
 
           {/* Footer */}
           <div className="text-center pt-6 mt-6 md:mt-8 border-t border-gray-200">
