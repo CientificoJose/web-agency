@@ -227,8 +227,8 @@ export default function JgStoreProposalPage() {
               <div className="bg-blue-50 rounded-lg p-4 md:p-5 text-center">
                 <h4 className="font-medium text-dark mb-2 md:mb-3">Segundo Pago</h4>
                 <div className="text-xl md:text-2xl font-bold text-primary mb-2">$63.33</div>
-                <p className="text-sm text-green-600 font-medium">Abonado: $29.83</p>
-                <p className="text-sm text-red-600 font-medium">Restante: $33.50</p>
+                <p className="text-sm text-green-600 font-medium">Abonado: $62.38</p>
+                <p className="text-sm text-red-600 font-medium">Restante: $0.95</p>
                 <p className="text-xs md:text-sm text-gray-600 mt-2">2. Desarrollo del Sistema de Automatización</p>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 md:p-5 text-center">
