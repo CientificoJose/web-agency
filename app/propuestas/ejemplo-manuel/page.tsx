@@ -95,7 +95,22 @@ export default function ManuelExampleProposalPage() {
             <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
               <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Cliente</h3>
               {/* Cambia estos datos para cada propuesta */}
-              <p className="text-gray-700 text-sm md:text-base">Manuel</p>
+              <p className="text-gray-700 text-sm md:text-base">Manuel Alejandro</p>
+              <p className="text-gray-700 text-sm md:text-base">Fecha: {fecha}</p>
+            </div>
+          </div>
+
+           {/* Datos de Contacto */}
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mb-6 md:mb-8">
+            <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+              <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">CEO</h3>
+              <p className="text-gray-700 text-sm md:text-base">José Nieves</p>
+              <p className="text-gray-700 text-sm md:text-base">Teléfono: +58 424 360 3846</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+              <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Cliente</h3>
+              {/* Cambia estos datos para cada propuesta */}
+              <p className="text-gray-700 text-sm md:text-base">Manuel Alejandro</p>
               <p className="text-gray-700 text-sm md:text-base">Fecha: {fecha}</p>
             </div>
           </div>
