@@ -202,6 +202,14 @@ export default function JgStoreProposalPage() {
                   <li>Equivalente en USD: <strong>$30.30</strong></li>
                 </ul>
               </div>
+              <div className="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg">
+                <p className="font-semibold text-sm md:text-base">Abono recibido el 05/08/2025.</p>
+                <ul className="list-disc pl-5 mt-2 text-sm md:text-base">
+                  <li>Monto en Bolívares: <strong>5.596,00 Bs.</strong></li>
+                  <li>Tasa de Cambio (USDT): <strong>171,59 Bs.</strong></li>
+                  <li>Equivalente en USD: <strong>$32.55</strong></li>
+                </ul>
+              </div>
             </div>
           </div>
 
