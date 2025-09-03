@@ -277,7 +277,7 @@ export default function Contact() {
                 </motion.a>
 
                 <motion.a
-                  href="https://instagram.com/limitlessagency"
+                  href="https://www.instagram.com/sinlimites_agency/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"

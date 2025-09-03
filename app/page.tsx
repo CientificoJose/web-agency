@@ -24,7 +24,7 @@ export default function HomePage() {
       if (hour >= 20 || hour < 6) {
         setTheme("dark")
       } else {
-        setTheme("light")
+        setTheme("dark")
       }
     }
 
