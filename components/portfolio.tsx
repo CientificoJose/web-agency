@@ -159,14 +159,14 @@ export default function Portfolio() {
               style={{ scrollBehavior: 'smooth' }}
             >
               {projects.map((project, index) => (
-                <div key={index} className="carousel-item snap-start flex-none basis-1/3">
+                <div key={index} className="carousel-item snap-start flex-none w-[85%] sm:w-1/2 lg:w-1/3">
                   <div className="group relative rounded-3xl bg-white dark:bg-slate-800 shadow-xl">
                     <a
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Visitar ${project.title}`}
-                      className="relative block h-64 rounded-t-3xl overflow-hidden"
+                      className="relative block h-56 sm:h-64 lg:h-72 rounded-t-3xl overflow-hidden"
                     >
                       <Image
                         src={project.image || "/placeholder.svg"}
@@ -208,7 +208,7 @@ export default function Portfolio() {
             {/* Botones de navegación */}
             <button
               onClick={() => scrollByCards(-1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full hidden md:flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
               aria-label="Anterior"
             >
               <ChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -216,7 +216,7 @@ export default function Portfolio() {
 
             <button
               onClick={() => scrollByCards(1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full hidden md:flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
               aria-label="Siguiente"
             >
               <ChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
