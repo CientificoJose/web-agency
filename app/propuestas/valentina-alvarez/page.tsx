@@ -29,8 +29,8 @@ export default function ValentinaAlvarezProposalPage() {
 
         {/* Header */}
         <div className="text-center pb-5 border-b-2 border-primary mb-6 md:mb-8 w-full">
-          <Image src="/recurso.png" alt="Logo Limitless Agency" width={128} height={128} className="w-24 md:w-32 mb-2 mx-auto" />
-          <h1 className="text-xl md:text-2xl font-bold text-dark">Limitless Agency</h1>
+          <Image src="/recurso.png" alt="Logo Sin Limites" width={128} height={128} className="w-24 md:w-32 mb-2 mx-auto" />
+          <h1 className="text-xl md:text-2xl font-bold text-dark">Sin Limites</h1>
           <h2 className="text-base md:text-lg text-primary">Propuesta Digital</h2>
         </div>
 
