@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
+import { Suspense, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import {
@@ -19,9 +19,17 @@ type SignatureData = {
   recordedAtISO: string
 }
 
+export default function TupacProposalPage() {
+  return (
+    <Suspense>
+      <TupacProposalPageInner />
+    </Suspense>
+  )
+}
+
 const SIGNATURE_STORAGE_KEY = "proposal-tupac-signature"
 
-export default function TupacProposalPage() {
+function TupacProposalPageInner() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [hasStrokes, setHasStrokes] = useState(false)

@@ -70,6 +70,10 @@ export function TupacArchitectureSection(): React.ReactElement {
             <li>Video loop o cinemagraph con manifiesto personal y CTA directo a “Trabajemos juntos”.</li>
             <li>Contador de hitos: campañas, producciones destacadas y comunidades gestionadas.</li>
             <li>Accesos rápidos a portafolio, servicios y contacto contractual.</li>
+            <li>
+              Referencia visual clave: <a href="https://rascals.co/" target="_blank" rel="noreferrer" className="text-primary underline">Rascals Co - Hair Styling Products – RASCALSCO</a> para reforzar estética premium
+              urbana con enfoque en cuidado personal.
+            </li>
           </ul>
         </div>
         <div>
