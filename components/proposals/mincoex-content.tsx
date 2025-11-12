@@ -140,10 +140,6 @@ export function MincoexInvestmentSection(): React.ReactElement {
               <li>Capacitación a voceros designados para redactar y programar noticias.</li>
             </ul>
           </div>
-          <div className="bg-white border border-slate-200 rounded-lg p-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Condiciones de pago</p>
-            <p>50% a la aprobación de prototipos, 50% al entregar el sistema operativo y credenciales. Transferible en USD o Bs vía Tesoro/BCV.</p>
-          </div>
         </div>
       </div>
     </section>
