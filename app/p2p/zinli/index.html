@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora P2P de Cripto Arbitraje</title>
+    <!-- Incluyendo Tailwind CSS para un diseño limpio y responsive (se ve bien en móvil) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#0070F3',
+                        'secondary': '#16A34A', // Verde para ganancias
+                        'danger': '#DC2626', // Rojo para pérdidas
+                        'card-bg': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilo base para el body y asegurar la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        /* Clase para inputs y selects */
+        .input-style {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #D1D5DB;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .input-style:focus {
+            border-color: #0070F3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.2);
+        }
+        /* Estilo para los resultados principales */
+        .result-box {
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .toggle-label {
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        /* Estilo para el botón activo/seleccionado */
+        .toggle-input:checked + .toggle-label {
+            background-color: #0070F3;
+            color: white;
+            font-weight: 600;
+        }
+        .toggle-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-md mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-xl my-8">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-primary">Ciclo P2P y Arbitraje</h1>
+            <p class="text-gray-500 text-sm mt-1">Calculadora de Ganancias USDT/ZINLI</p>
+        </header>
+
+        <main id="calculator-app">
+            
+            <!-- SECCIÓN DE ENTRADAS -->
+            <div class="space-y-4 mb-6">
+                
+                <!-- 1. Monto Inicial -->
+                <div>
+                    <label for="initialUsdt" class="block text-sm font-medium text-gray-700 mb-1">Monto Inicial (USDT)</label>
+                    <input type="number" id="initialUsdt" value="5000.00" step="100.00" min="1" class="input-style" oninput="calculateProfit()">
+                </div>
+
+                <!-- 2. Tasa de Venta (USDT a ZINLI) -->
+                <div>
+                    <label for="sellRate" class="block text-sm font-medium text-gray-700 mb-1">Tasa 1: Vendes USDT por ZINLI (ZINLI/USDT)</label>
+                    <div class="relative">
+                        <input type="number" id="sellRate" value="1.002" step="0.0001" min="0.001" class="input-style pr-10" oninput="calculateProfit()">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">ZINLI</span>
+                    </div>
+                </div>
+
+                <!-- 3. Tasa de Compra (ZINLI a USDT) -->
+                <div>
+                    <label for="buyRate" class="block text-sm font-medium text-gray-700 mb-1">Tasa 2: Compras USDT con ZINLI (ZINLI/USDT)</label>
+                    <div class="relative">
+                        <input type="number" id="buyRate" value="0.981" step="0.0001" min="0.001" class="input-style pr-10" oninput="calculateProfit()">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">ZINLI</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Buscas Tasa 1 alta y Tasa 2 baja para ganar.</p>
+                </div>
+                
+                <!-- 4. Ajuste de Comisión (Fijo o Porcentaje) -->
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Comisión / Ajuste (Pérdida por comisiones, etc.)</label>
+                    
+                    <!-- Toggle para seleccionar tipo de ajuste -->
+                    <div class="flex bg-gray-200 rounded-lg p-1 mb-3">
+                        <!-- Ahora sin 'checked' -->
+                        <input type="radio" id="typeFixed" name="feeType" value="fixed" class="toggle-input" onchange="calculateProfit()">
+                        <label for="typeFixed" class="toggle-label flex-1 text-center text-sm text-gray-700">Monto Fijo (USDT)</label>
+
+                        <!-- Nuevo por defecto: checked y valor 0.50 -->
+                        <input type="radio" id="typePercentage" name="feeType" value="percentage" class="toggle-input" checked onchange="calculateProfit()">
+                        <label for="typePercentage" class="toggle-label flex-1 text-center text-sm text-gray-700">Porcentaje (%)</label>
+                    </div>
+
+                    <!-- Input de la comisión -->
+                    <div class="relative">
+                        <input type="number" id="feeAdjustment" value="0.50" step="0.01" min="0" class="input-style pr-10" oninput="calculateProfit()">
+                        <span id="feeUnit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                    </div>
+                    <p id="feeExplanation" class="text-xs text-blue-700 mt-1 font-medium">Comisión calculada como 0.50% del capital inicial.</p>
+                </div>
+
+            </div>
+
+            <!-- SECCIÓN DE RESULTADOS -->
+            <div class="p-4 rounded-lg bg-card-bg border border-gray-200">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 border-b pb-2">Resultados del Ciclo</h2>
+
+                <!-- 1. ZINLI Obtenido -->
+                <div class="flex justify-between py-1 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">Total ZINLI (Paso 1):</span>
+                    <span id="zinliAmount" class="text-sm font-medium text-gray-900">0.00 ZINLI</span>
+                </div>
+
+                <!-- 2. USDT Final BRUTO -->
+                <div class="flex justify-between py-1 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">USDT Final (Bruto, sin comisión):</span>
+                    <span id="finalUsdtGross" class="text-sm font-bold text-gray-900">0.00 USDT</span>
+                </div>
+                
+                <!-- 3. Comisión Descontada (Nuevo campo) -->
+                <div class="flex justify-between py-1 border-b border-gray-100">
+                    <span class="text-sm text-gray-600">Total Descontado por Ajuste:</span>
+                    <span id="actualFeeAmount" class="text-sm font-medium text-danger">0.00 USDT</span>
+                </div>
+
+                <!-- 4. Ganancia NETA (El resultado clave) -->
+                <div class="result-box" id="netProfitBox">
+                    <div class="flex justify-between items-center">
+                        <span class="text-md font-medium text-gray-800">Ganancia Neta (Final):</span>
+                        <span id="netProfit" class="text-2xl font-extrabold text-secondary">0.00 USDT</span>
+                    </div>
+                </div>
+
+                <!-- 5. ROI % -->
+                <div class="flex justify-between py-2 mt-2">
+                    <span class="text-md text-gray-700 font-semibold">Retorno de Inversión (ROI):</span>
+                    <span id="roiPercentage" class="text-xl font-extrabold text-primary">0.00%</span>
+                </div>
+
+            </div>
+
+        </main>
+
+        <footer class="mt-6 text-center text-xs text-gray-400">
+            <p>&copy; Calculadora P2P. Recuerda que la liquidez y las tasas varían constantemente.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Función para redondear a 4 decimales
+        const toFixed4 = (num) => parseFloat(num.toFixed(4));
+        // Función para formatear a 2 decimales para la visualización de moneda
+        const formatCurrency = (num) => num.toFixed(2);
+
+        function calculateProfit() {
+            // Obtener valores de los inputs
+            const initialUsdt = parseFloat(document.getElementById('initialUsdt').value) || 0;
+            const sellRate = parseFloat(document.getElementById('sellRate').value) || 0;
+            const buyRate = parseFloat(document.getElementById('buyRate').value) || 0;
+            const feeValue = parseFloat(document.getElementById('feeAdjustment').value) || 0;
+            // Obtener el tipo de comisión seleccionado
+            const feeType = document.querySelector('input[name="feeType"]:checked').value;
+
+            // Referencias a elementos
+            const zinliAmountElement = document.getElementById('zinliAmount');
+            const finalUsdtGrossElement = document.getElementById('finalUsdtGross');
+            const actualFeeAmountElement = document.getElementById('actualFeeAmount');
+            const netProfitElement = document.getElementById('netProfit');
+            const roiPercentageElement = document.getElementById('roiPercentage');
+            const netProfitBox = document.getElementById('netProfitBox');
+            const feeUnit = document.getElementById('feeUnit');
+            const feeExplanation = document.getElementById('feeExplanation');
+
+
+            // --- CONFIGURACIÓN DE LA COMISIÓN ---
+            let actualFeeAmount = 0;
+            if (feeType === 'percentage') {
+                // Si es porcentaje, el valor se interpreta como % del capital inicial
+                actualFeeAmount = toFixed4(initialUsdt * (feeValue / 100));
+                feeUnit.textContent = '%';
+                feeExplanation.textContent = `Ajuste calculado: ${formatCurrency(actualFeeAmount)} USDT (el ${feeValue}% de ${formatCurrency(initialUsdt)} USDT)`;
+            } else {
+                // Si es fijo, el valor es el monto directo en USDT
+                actualFeeAmount = toFixed4(feeValue);
+                feeUnit.textContent = 'USDT';
+                feeExplanation.textContent = `Ajuste calculado: ${formatCurrency(actualFeeAmount)} USDT (monto fijo)`;
+            }
+            actualFeeAmountElement.textContent = `-${formatCurrency(actualFeeAmount)} USDT`;
+
+
+            // --- PASO 1: VENDER USDT POR ZINLI ---
+            // ZINLI = USDT Inicial * Tasa de Venta
+            let zinliAmount = toFixed4(initialUsdt * sellRate);
+            zinliAmountElement.textContent = `${formatCurrency(zinliAmount)} ZINLI`;
+
+            // --- PASO 2: COMPRAR USDT CON ZINLI (Cálculo Bruto) ---
+            // USDT Final Bruto = ZINLI / Tasa de Compra
+            let finalUsdtGross = 0;
+            if (buyRate > 0) {
+                finalUsdtGross = toFixed4(zinliAmount / buyRate);
+            }
+            finalUsdtGrossElement.textContent = `${formatCurrency(finalUsdtGross)} USDT`;
+
+            // --- PASO 3: GANANCIAS ---
+            let grossProfit = toFixed4(finalUsdtGross - initialUsdt);
+            // Ganancia Neta = Ganancia Bruta - Ajuste de Comisión
+            let netProfit = toFixed4(grossProfit - actualFeeAmount);
+            
+            let roi = (initialUsdt > 0) ? toFixed4((netProfit / initialUsdt) * 100) : 0;
+
+            // Actualizar Ganancia Neta
+            netProfitElement.textContent = `${formatCurrency(netProfit)} USDT`;
+
+            // Actualizar ROI
+            roiPercentageElement.textContent = `${formatCurrency(roi)}%`;
+
+            // Aplicar estilos de color según el resultado
+            
+            // Resetear y aplicar clases al resultado neto
+            netProfitBox.className = 'result-box';
+            netProfitBox.classList.add(netProfit >= 0 ? 'bg-green-50' : 'bg-red-50');
+            netProfitBox.classList.add(netProfit >= 0 ? 'border-green-200' : 'border-red-200');
+
+            netProfitElement.classList.remove('text-secondary', 'text-danger');
+            netProfitElement.classList.add(netProfit >= 0 ? 'text-secondary' : 'text-danger');
+
+            roiPercentageElement.classList.remove('text-primary', 'text-secondary', 'text-danger');
+            roiPercentageElement.classList.add(roi >= 0 ? 'text-secondary' : 'text-danger');
+
+        }
+
+        // Ejecutar cálculo al cargar para mostrar los valores iniciales del ejemplo
+        window.onload = calculateProfit;
+    </script>
+</body>
+</html>
