@@ -1,26 +1,16 @@
 import React from "react"
 
+const CURRENT_ABONO_USDT = 5
+
 const PLAN_DATA = [
   {
     id: "standard",
-    deliveryLabel: "Entrega en 25 días hábiles",
+    deliveryLabel: "Plan único | Entrega en 25 días hábiles",
     price: 289.99,
+    creditValue: 89.99,
+    creditLabel: "Alianza barbería (48 cortes / 12 meses)",
     durationDetail: "Calendario estándar con iteraciones semanales",
-    note: "Ideal para validar narrativa y piezas creativas con comodidad antes del lanzamiento.",
-  },
-  {
-    id: "priority",
-    deliveryLabel: "Entrega prioritaria en 15 días hábiles",
-    price: 349.99,
-    durationDetail: "Sprints focalizados con checkpoints cada 3 días",
-    note: "Perfecto cuando necesitas salir antes de una campaña o colaboración ya calendarizada.",
-  },
-  {
-    id: "express",
-    deliveryLabel: "Entrega express en 10 días hábiles",
-    price: 449,
-    durationDetail: "Trabajo en células diarias con aprobación continua",
-    note: "Pensado para ventanas ultra rápidas o coberturas que requieren presencia digital inmediata.",
+    note: "Abonos flexibles: iniciaremos producción cuando se alcance el 50% (USD 100) del total ajustado.",
   },
 ] as const
 
@@ -152,46 +142,61 @@ export function TupacProcessSection(): React.ReactElement {
 export function TupacPlansSection(): React.ReactElement {
   return (
     <section className="bg-gradient-to-r from-[#ff6600]/10 to-[#ff1493]/10 border border-primary/20 rounded-2xl p-5 md:p-6">
-      <h3 className="text-base md:text-lg font-semibold text-dark mb-4">4. Planes de Servicio &amp; Condiciones</h3>
-      <div className="flex flex-col md:flex-row gap-4 overflow-x-auto pb-2 text-sm md:text-base text-gray-700 scroll-smooth" style={{ scrollbarWidth: "thin" }}>
+      <h3 className="text-base md:text-lg font-semibold text-dark mb-4">4. Plan de Servicio &amp; Condiciones</h3>
+      <div className="text-sm md:text-base text-gray-700">
         {PLAN_DATA.map((plan) => {
-          const discounted = +(plan.price - 89.99).toFixed(2)
-          const initialPayment = +(discounted / 2).toFixed(2)
-          const remaining = +(discounted - initialPayment).toFixed(2)
+          const creditValue = plan.creditValue ?? 0
+          const discounted = +(plan.price - creditValue).toFixed(2)
+          const kickoffThreshold = +(discounted / 2).toFixed(2)
+          const remainingToKickoff = Math.max(kickoffThreshold - CURRENT_ABONO_USDT, 0)
+          const balanceAfterKickoff = Math.max(discounted - CURRENT_ABONO_USDT, 0)
 
           return (
-            <div key={plan.id} className="min-w-full md:min-w-[300px] lg:min-w-[340px] bg-white rounded-xl p-4 border border-gray-200 space-y-3 flex-1">
+            <div key={plan.id} className="bg-white rounded-2xl p-4 md:p-5 border border-gray-200 space-y-4">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-wide text-primary">Ventana de entrega</p>
-                <h4 className="text-lg font-semibold text-dark">{plan.deliveryLabel}</h4>
+                <h4 className="text-lg md:text-xl font-semibold text-dark">{plan.deliveryLabel}</h4>
+                <p className="text-sm text-gray-600">{plan.durationDetail}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs uppercase tracking-wide text-gray-500">Inversión base</p>
-                <p className="text-2xl font-bold text-primary">USD {plan.price.toFixed(2)}</p>
-                <p className="text-xs text-gray-500">{plan.durationDetail}</p>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xs uppercase tracking-wide text-gray-500">Alianza barbería (24 cortes / 6 meses)</p>
-                <p className="text-lg font-semibold text-gray-900">- USD 89.99</p>
-                <p className="text-xs text-gray-500">Crédito aplicado al costo del proyecto.</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs uppercase tracking-wide text-gray-500">Total ajustado</p>
-                <p className="text-2xl font-bold text-primary">USD {discounted.toFixed(2)}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg border border-gray-200 p-3">
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Anticipo 50%</p>
-                  <p className="text-lg font-semibold text-gray-900">USD {initialPayment.toFixed(2)}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Inversión base</p>
+                  <p className="text-2xl font-bold text-primary">USD {plan.price.toFixed(2)}</p>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-3">
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Saldo a entrega</p>
-                  <p className="text-lg font-semibold text-gray-900">USD {remaining.toFixed(2)}</p>
+                <div className="bg-white border border-gray-200 rounded-xl p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">{plan.creditLabel}</p>
+                  <p className="text-lg font-semibold text-gray-900">- USD {creditValue.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500">Crédito aplicado al costo del proyecto.</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Total ajustado</p>
+                  <p className="text-2xl font-bold text-primary">USD {discounted.toFixed(2)}</p>
                 </div>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <p className="text-xs uppercase tracking-wide text-gray-500">Bonus exclusivo</p>
+              <div className="bg-white border border-gray-200 rounded-xl p-3">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Abonos flexibles</p>
                 <p className="text-sm text-gray-700">
+                  Puedes transferir el monto que prefieras; iniciaremos producción cuando los abonos acumulados alcancen el 50% del total ajustado
+                  (USD {kickoffThreshold.toFixed(2)}). El saldo pendiente se liquida contra entrega final.
+                </p>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs uppercase tracking-wide text-gray-500">
+                  <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <p className="text-[11px] text-gray-500">Abono recibido</p>
+                    <p className="text-base font-semibold text-gray-900">USDT {CURRENT_ABONO_USDT.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <p className="text-[11px] text-gray-500">Falta para 50%</p>
+                    <p className="text-base font-semibold text-gray-900">USD {remainingToKickoff.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <p className="text-[11px] text-gray-500">Saldo total restante</p>
+                    <p className="text-base font-semibold text-gray-900">USD {balanceAfterKickoff.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-900/90 text-white rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wide text-primary-light">Bonus exclusivo</p>
+                <p className="text-sm md:text-base text-white/90">
                   Durante seis meses diseñaremos propuestas y contratos digitales para tus clientes, reforzando tu oferta de valor en cada servicio
                   contratado.
                 </p>
@@ -238,8 +243,8 @@ export function TupacTermsSection(): React.ReactElement {
       <div className="space-y-3 text-sm md:text-base text-gray-700">
         <p>
           Los pagos pueden realizarse en USD vía transferencia (Binance Pay/USDT) o en bolívares calculados a la tasa Binance vigente al momento de la
-          transacción. El anticipo del 50% se cancela para iniciar, aplicando el crédito de USD 89.99 correspondiente al intercambio de 24 cortes de
-          cabello durante seis meses.
+          transacción. Se mantiene el crédito de USD {PLAN_DATA[0].creditValue.toFixed(2)} correspondiente al intercambio de 48 cortes de cabello
+          (12 meses). El cliente puede abonar montos parciales y el proyecto iniciará cuando se alcance el 50% del total ajustado.
         </p>
         <p>
           El saldo restante se liquida al aprobar la versión final. Solicitudes adicionales o fuera de alcance se estiman y cotizan por separado. El
