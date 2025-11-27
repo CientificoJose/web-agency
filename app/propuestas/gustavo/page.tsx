@@ -26,7 +26,7 @@ export default function GustavoProposalPage() {
             <h3 className="font-semibold text-slate-900 mb-2 text-base md:text-lg">Operador</h3>
             <p className="text-slate-700 text-sm md:text-base">José Nieves</p>
             <p className="text-slate-700 text-sm md:text-base">Responsable de ejecución, reportes y custodia operativa.</p>
-            <p className="text-slate-500 text-xs md:text-sm mt-2">Contacto: +58 412 4015063 | jose.nieves@sinlimites-agency.online</p>
+            <p className="text-slate-500 text-xs md:text-sm mt-2">Contacto: +58 412 4015063 | jose.nieves@sinlimites-agency.site</p>
           </article>
           <article className="bg-slate-50 p-4 rounded-lg border-l-4 border-amber-500">
             <h3 className="font-semibold text-slate-900 mb-2 text-base md:text-lg">Inversionista</h3>

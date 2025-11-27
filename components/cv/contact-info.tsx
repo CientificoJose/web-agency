@@ -86,7 +86,7 @@ export default function ContactInfo() {
           </a>
 
           <a
-            href="http://sinlimites-agency.online/"
+            href="http://sinlimites-agency.site/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-3 hover:bg-[#ff6600]/10 p-2 rounded transition-colors"

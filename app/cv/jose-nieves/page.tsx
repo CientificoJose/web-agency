@@ -58,7 +58,7 @@ export default function JoseNievesCV() {
                     <strong>Instagram:</strong> @josemind_win
                   </div>
                   <div>
-                    <strong>Web:</strong> sinlimites-agency.online
+                    <strong>Web:</strong> sinlimites-agency.site
                   </div>
                 </div>
               </div>

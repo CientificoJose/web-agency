@@ -25,11 +25,11 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
   keywords: "desarrollo web, aplicaciones móviles, React, Next.js, TypeScript, diseño web, Venezuela",
-  authors: [{ name: "José Nieves", url: "https://sinlimites-agency.online" }],
+  authors: [{ name: "José Nieves", url: "https://sinlimites-agency.site" }],
   openGraph: {
     title: "Limitless Agency - Mentes Creativas, Obras Creativas",
     description: "Transformamos ideas en soluciones tecnológicas innovadoras",
-    url: "https://sinlimites-agency.online",
+    url: "https://sinlimites-agency.site",
     siteName: "Limitless Agency",
     locale: "es_ES",
     type: "website",

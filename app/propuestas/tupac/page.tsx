@@ -283,7 +283,7 @@ function TupacProposalPageInner() {
             <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Consultor Digital</h3>
             <p className="text-gray-700 text-sm md:text-base">José Nieves</p>
             <p className="text-gray-700 text-sm md:text-base">+58 424 360 3846</p>
-            <p className="text-gray-700 text-sm md:text-base">contact@sinlimites-agency.online</p>
+            <p className="text-gray-700 text-sm md:text-base">contact@sinlimites-agency.site</p>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
             <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Cliente</h3>

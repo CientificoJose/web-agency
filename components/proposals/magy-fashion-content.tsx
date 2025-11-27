@@ -100,7 +100,7 @@ export function MagyPaymentMethodsSection(): React.ReactElement {
         </div>
       </div>
       <p className="mt-4 text-xs md:text-sm text-slate-300">
-        Envía el comprobante a <a href="mailto:contact@sinlimites-agency.online" className="underline">contact@sinlimites-agency.online</a> o al WhatsApp +58 412 4015063 para confirmar el abono.
+        Envía el comprobante a <a href="mailto:contact@sinlimites-agency.site" className="underline">contact@sinlimites-agency.site</a> o al WhatsApp +58 412 4015063 para confirmar el abono.
       </p>
     </section>
   )

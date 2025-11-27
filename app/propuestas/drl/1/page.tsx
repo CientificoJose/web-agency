@@ -133,7 +133,7 @@ export default function DrlProposalPage() {
           <div className="text-center pt-6 mt-6 md:mt-8 border-t border-gray-200">
             <p className="text-gray-600 italic text-sm md:text-base">"Automatizamos tu crecimiento comercial"</p>
             <div className="text-primary font-bold text-base md:text-lg mt-2">Sin Límites Digital Agency</div>
-            <p className="text-xs md:text-sm text-gray-500 mt-2">© 2025 - sinlimites_agency | http://www.sinlimites-agency.online/</p>
+            <p className="text-xs md:text-sm text-gray-500 mt-2">© 2025 - sinlimites_agency | http://www.sinlimites-agency.site/</p>
           </div>
         </div>
       </div>

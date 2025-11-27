@@ -40,7 +40,7 @@ export default function ValentinaAlvarezProposalPage() {
             <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Consultor Digital</h3>
             <p className="text-gray-700 text-sm md:text-base">José Nieves</p>
             <p className="text-gray-700 text-sm md:text-base">+58 424 360 3846</p>
-            <p className="text-gray-700 text-sm md:text-base">contact@sinlimites-agency.online</p>
+            <p className="text-gray-700 text-sm md:text-base">contact@sinlimites-agency.site</p>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
             <h3 className="font-semibold text-dark mb-2 text-base md:text-lg">Cliente</h3>
@@ -214,7 +214,7 @@ export default function ValentinaAlvarezProposalPage() {
               Confirmar por WhatsApp
             </a>
             <a
-              href="mailto:contact@sinlimites-agency.online?subject=Propuesta%20Rebranding%20Liz%20Spa%20Center&body=Hola%20José,%20vamos%20adelante%20con%20la%20propuesta."
+              href="mailto:contact@sinlimites-agency.site?subject=Propuesta%20Rebranding%20Liz%20Spa%20Center&body=Hola%20José,%20vamos%20adelante%20con%20la%20propuesta."
               className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary text-white font-semibold hover:bg-primary-dark transition"
             >
               Aceptar por Email

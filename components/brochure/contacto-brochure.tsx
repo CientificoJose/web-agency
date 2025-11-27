@@ -236,7 +236,7 @@ export default function ContactoBrochure() {
                   </div>
                   <div>
                     <p className="font-medium text-white">Email</p>
-                    <p className="text-sm">assistant@sinlimites-agency.online</p>
+                    <p className="text-sm">assistant@sinlimites-agency.site</p>
                   </div>
                 </motion.div>
 

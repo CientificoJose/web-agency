@@ -7,11 +7,11 @@ export const metadata: Metadata = {
     "Estima el costo de tu próximo proyecto de landing page de manera rápida y transparente. Calculadora de precios para diseño web.",
   keywords:
     "calculadora precios, landing page, diseño web, cotización, desarrollo web, precios diseño, Sin Límites Agency",
-  authors: [{ name: "Sin Límites Agency", url: "https://sinlimites-agency.online" }],
+  authors: [{ name: "Sin Límites Agency", url: "https://sinlimites-agency.site" }],
   openGraph: {
     title: "Landing Pages | Sin Límites Agency",
     description: "Estima el costo de tu próximo proyecto de landing page de manera rápida y transparente.",
-    url: "https://sinlimites-agency.online/lading-pages",
+    url: "https://sinlimites-agency.site/lading-pages",
     siteName: "Sin Límites Agency",
     locale: "es_ES",
     type: "website",

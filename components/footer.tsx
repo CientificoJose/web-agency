@@ -55,12 +55,12 @@ export default function Footer() {
               </motion.a>
 
               <motion.a
-                href="mailto:assistant@sinlimites-agency.online"
+                href="mailto:assistant@sinlimites-agency.site"
                 className="flex items-center space-x-3 text-slate-300 hover:text-[#ff6600] transition-colors duration-200"
                 whileHover={{ x: 5 }}
               >
                 <Mail className="w-5 h-5" />
-                <span>assistant@sinlimites-agency.online</span>
+                <span>assistant@sinlimites-agency.site</span>
               </motion.a>
             </div>
           </div>

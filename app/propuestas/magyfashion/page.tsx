@@ -31,7 +31,7 @@ export default function MagyFashionAgreementPage() {
             <h3 className="font-semibold text-slate-900 mb-2 text-base md:text-lg">Responsable</h3>
             <p className="text-slate-700 text-sm md:text-base">José Nieves</p>
             <p className="text-slate-700 text-sm md:text-base">Sin Límites | Consultoría Digital</p>
-            <p className="text-slate-500 text-xs md:text-sm mt-2">+58 412 4015063 | contact@sinlimites-agency.online</p>
+            <p className="text-slate-500 text-xs md:text-sm mt-2">+58 412 4015063 | contact@sinlimites-agency.site</p>
           </article>
         </section>
 

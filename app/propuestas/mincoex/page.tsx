@@ -44,7 +44,7 @@ export default function MincoexProposalPage() {
             <h3 className="font-semibold text-slate-900 mb-2 text-base md:text-lg">Consultor Digital</h3>
             <p className="text-slate-700 text-sm md:text-base">José Nieves</p>
             <p className="text-slate-700 text-sm md:text-base">+58 424 360 3846</p>
-            <p className="text-slate-700 text-sm md:text-base">contact@sinlimites-agency.online</p>
+            <p className="text-slate-700 text-sm md:text-base">contact@sinlimites-agency.site</p>
             <p className="text-slate-500 text-xs md:text-sm mt-2">Coordinación directa con Dirección de TIC MINCOEX.</p>
           </article>
           <article className="bg-slate-50 p-4 rounded-lg border-l-4 border-blue-600">
@@ -87,12 +87,12 @@ export default function MincoexProposalPage() {
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Coordinación del proyecto</p>
                 <p className="font-medium">José Nieves</p>
-                <p className="text-slate-600">contact@sinlimites-agency.online</p>
+                <p className="text-slate-600">contact@sinlimites-agency.site</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Soporte técnico</p>
                 <p className="font-medium">Mesa Técnica Sin Límites</p>
-                <p className="text-slate-600">support@sinlimites-agency.online</p>
+                <p className="text-slate-600">support@sinlimites-agency.site</p>
               </div>
             </div>
           </div>
