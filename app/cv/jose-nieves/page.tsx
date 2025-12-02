@@ -52,10 +52,27 @@ export default function JoseNievesCV() {
                     <strong>Cédula:</strong> 27.262.539
                   </div>
                   <div>
-                    <strong>LinkedIn:</strong> jose-nieves-sin-limites
+                    <strong>LinkedIn:</strong>{" "}
+                    <a
+                      href="https://www.linkedin.com/in/jose-nieves-sin-limites"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#ff1493] underline"
+                    >
+                      jose-nieves-sin-limites
+                    </a>
                   </div>
                   <div>
-                    <strong>Instagram:</strong> @josemind_win
+                    <strong>GitHub:</strong>{" "}
+                    <a href="https://github.com/CientificoJose" target="_blank" rel="noreferrer" className="text-[#ff1493] underline">
+                      github.com/CientificoJose
+                    </a>
+                  </div>
+                  <div>
+                    <strong>Instagram:</strong>{" "}
+                    <a href="https://www.instagram.com/josemind_win" target="_blank" rel="noreferrer" className="text-[#ff1493] underline">
+                      @josemind_win
+                    </a>
                   </div>
                   <div>
                     <strong>Web:</strong> sinlimites-agency.site
