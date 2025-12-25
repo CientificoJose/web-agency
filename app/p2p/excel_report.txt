@@ -1,0 +1,46 @@
+﻿Workbook: d:\Repositorios\web-agency\app\p2p\Copia de Calculo de Precios y Ganancia - Escalado P2P.xlsx
+Generated: 2025-12-25T15:35:09.6065180-04:00
+
+=== SHEET: Calculo Rentabilidad ===
+UsedRange: $A$1:$G$14
+-- Find: comis --
+Not found
+-- Find: comisión --
+Not found
+-- Find: fee --
+Not found
+-- Find: ganancia --
+Not found
+-- Find: roi --
+Not found
+-- Find: tasa --
+Not found
+-- Find: USDT --
+Not found
+-- Find: Zinli --
+Not found
+-- Find: Bs --
+Not found
+
+=== SHEET: Calculadora de Precios de Compr ===
+UsedRange: $A$1:$Z$1000
+-- Find: comis --
+Not found
+-- Find: comisión --
+Not found
+-- Find: fee --
+Not found
+-- Find: ganancia --
+Not found
+-- Find: roi --
+Not found
+-- Find: tasa --
+Not found
+-- Find: USDT --
+Not found
+-- Find: Zinli --
+Not found
+-- Find: Bs --
+Not found
+
+

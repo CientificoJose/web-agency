@@ -1,0 +1,27 @@
+﻿Sheet\tAddress\tValue\tFormula
+Calculo Rentabilidad\tC2\tCAPITAL\tCAPITAL
+Calculo Rentabilidad\tD2\t300\t300
+Calculo Rentabilidad\tE2\tCOMISION\tCOMISION
+Calculo Rentabilidad\tF2\t0.002\t0.002
+Calculo Rentabilidad\tB4\tCALCULO DE OPERATIVA\tCALCULO DE OPERATIVA
+Calculo Rentabilidad\tD6\tVenta Lote Completo\tVenta Lote Completo
+Calculo Rentabilidad\tE6\tCompra de X USDT\tCompra de X USDT
+Calculo Rentabilidad\tF6\tGANANCIA\tGANANCIA
+Calculo Rentabilidad\tC7\tTASA \tTASA 
+Calculo Rentabilidad\tD7\t480\t480
+Calculo Rentabilidad\tE7\t455\t455
+Calculo Rentabilidad\tF7\t0.0507294945054946\t=(((E8*100)/$D$2)-100)/100
+Calculo Rentabilidad\tC8\tMONTO\tMONTO
+Calculo Rentabilidad\tE8\t315.218848351648\t=(D8/E7)-(((D8/E7)*F2))
+Calculo Rentabilidad\tC9\tCICLOS AL DIA\tCICLOS AL DIA
+Calculo Rentabilidad\tD9\t1\t1
+Calculo Rentabilidad\tE9\tMETODOS DE PAGO\tMETODOS DE PAGO
+Calculo Rentabilidad\tF9\t1\t1
+Calculo Rentabilidad\tC11\tTasa Minima\tTasa Minima
+Calculo Rentabilidad\tD11\t478.08\t=(D7-D7*F2)-(D7*F2)
+Calculo Rentabilidad\tE11\tGanancia al Mes\tGanancia al Mes
+Calculo Rentabilidad\tF11\t456.565450549451\t=D13*30
+Calculo Rentabilidad\tC12\tGanancia por ciclo\tGanancia por ciclo
+Calculo Rentabilidad\tD12\t15.2188483516484\t=(($D$2*F7)*F9)
+Calculo Rentabilidad\tC13\tGanancia Total\tGanancia Total
+Calculo Rentabilidad\tD13\t15.2188483516484\t=(F7*D9*$D$2)*F9
