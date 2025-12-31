@@ -7,7 +7,7 @@ type StatusMessage = {
 
 type SignatureBlockProps = {
   showSignaturePad: boolean
-  canvasRef: React.RefObject<HTMLCanvasElement>
+  canvasRef: React.RefObject<HTMLCanvasElement | null>
   onPointerDown: (event: React.PointerEvent<HTMLCanvasElement>) => void
   onPointerMove: (event: React.PointerEvent<HTMLCanvasElement>) => void
   onPointerUp: (event: React.PointerEvent<HTMLCanvasElement>) => void
