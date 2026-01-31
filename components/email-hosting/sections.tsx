@@ -190,11 +190,14 @@ export function ComparisonTable() {
 }
 
 export function PricingCards() {
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual" | "biennial">("monthly")
+
+  console.log("Current billing period:", billingPeriod)
+
   const plans = [
     {
       name: "Básico",
-      price: "9.99",
-      period: "/mes",
+      monthlyPrice: 9.99,
       description: "Ideal para emprendedores y freelancers",
       features: [
         "hasta 3 cuentas de correo",
@@ -208,8 +211,7 @@ export function PricingCards() {
     },
     {
       name: "Pyme",
-      price: "19.99",
-      period: "/mes",
+      monthlyPrice: 19.99,
       description: "Perfecto para pequeñas y medianas empresas",
       features: [
         "hasta 10 cuentas de correo",
@@ -223,8 +225,7 @@ export function PricingCards() {
     },
     {
       name: "Corporativo",
-      price: "49.99",
-      period: "/mes",
+      monthlyPrice: 49.99,
       description: "Para empresas que necesitan escalabilidad",
       features: [
         "hasta 25 cuentas",
@@ -235,9 +236,34 @@ export function PricingCards() {
       ],
       cta: "Contactar Ventas",
       popular: false,
-      note: "*Sujeto a capacidad de disco",
     },
   ]
+
+  const calculatePrice = (monthlyPrice: number) => {
+    if (billingPeriod === "monthly") {
+      return { price: monthlyPrice.toFixed(2), period: "/mes", total: null, discount: null }
+    }
+    if (billingPeriod === "annual") {
+      const annualPrice = monthlyPrice * 10
+      const savings = (monthlyPrice * 12 - annualPrice).toFixed(2)
+      return { 
+        price: annualPrice.toFixed(2), 
+        period: "/año", 
+        total: `$${(monthlyPrice * 12).toFixed(2)}`,
+        discount: "16.67%",
+        savings: `$${savings}`
+      }
+    }
+    const biennialPrice = monthlyPrice * 24 * 0.80
+    const savings = (monthlyPrice * 24 - biennialPrice).toFixed(2)
+    return { 
+      price: biennialPrice.toFixed(2), 
+      period: "/2 años", 
+      total: `$${(monthlyPrice * 24).toFixed(2)}`,
+      discount: "20%",
+      savings: `$${savings}`
+    }
+  }
 
   return (
     <section id="pricing" className="py-16 md:py-24">
@@ -249,53 +275,119 @@ export function PricingCards() {
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
             Sin contratos largos. Cancela cuando quieras.
           </p>
-        </div>
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl border p-8 shadow-lg transition hover:shadow-xl ${
-                plan.popular
-                  ? "border-primary bg-gradient-to-br from-primary/5 to-primary/10"
-                  : "border-gray-200 bg-white"
+          
+          <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white p-2 shadow-sm relative z-10">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Clicking monthly")
+                setBillingPeriod("monthly")
+              }}
+              className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
+                billingPeriod === "monthly"
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-white">
-                  ⭐ Más Popular
-                </div>
-              )}
-              <div className="mb-6">
-                <h3 className="mb-2 text-2xl font-bold text-gray-900">{plan.name}</h3>
-                <p className="text-sm text-gray-600">{plan.description}</p>
-              </div>
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
-                  <span className="text-lg text-gray-600">{plan.period}</span>
-                </div>
-              </div>
-              <ul className="mb-8 space-y-3">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="#contact"
-                className={`block w-full rounded-full py-3 text-center font-semibold transition ${
+              Mensual
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Clicking annual")
+                setBillingPeriod("annual")
+              }}
+              className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
+                billingPeriod === "annual"
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Anual
+              <span className="ml-1 text-xs">(-17%)</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Clicking biennial")
+                setBillingPeriod("biennial")
+              }}
+              className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
+                billingPeriod === "biennial"
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              2 Años
+              <span className="ml-1 text-xs">(-20%)</span>
+            </button>
+          </div>
+        </div>
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
+          {plans.map((plan) => {
+            const pricing = calculatePrice(plan.monthlyPrice)
+            return (
+              <div
+                key={plan.name}
+                className={`relative rounded-2xl border p-8 shadow-lg transition hover:shadow-xl ${
                   plan.popular
-                    ? "bg-primary text-white hover:bg-primary/90"
-                    : "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
+                    ? "border-primary bg-gradient-to-br from-primary/5 to-primary/10"
+                    : "border-gray-200 bg-white"
                 }`}
               >
-                {plan.cta}
-              </a>
-              {plan.note && <p className="mt-4 text-xs text-gray-500">{plan.note}</p>}
-            </div>
-          ))}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-white">
+                    ⭐ Más Popular
+                  </div>
+                )}
+                {pricing.discount && (
+                  <div className="absolute -top-4 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
+                    Ahorra {pricing.discount}
+                  </div>
+                )}
+                <div className="mb-6">
+                  <h3 className="mb-2 text-2xl font-bold text-gray-900">{plan.name}</h3>
+                  <p className="text-sm text-gray-600">{plan.description}</p>
+                </div>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-gray-900">${pricing.price}</span>
+                    <span className="text-lg text-gray-600">{pricing.period}</span>
+                  </div>
+                  {pricing.total && (
+                    <div className="mt-2 text-sm text-gray-500">
+                      <span className="line-through">{pricing.total}</span>
+                      <span className="ml-2 font-semibold text-emerald-600">Ahorras {pricing.savings}</span>
+                    </div>
+                  )}
+                </div>
+                <ul className="mb-8 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="#contact"
+                  className={`block w-full rounded-full py-3 text-center font-semibold transition ${
+                    plan.popular
+                      ? "bg-primary text-white hover:bg-primary/90"
+                      : "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              </div>
+            )
+          })}
         </div>
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-6 py-4 text-sm text-blue-900">
