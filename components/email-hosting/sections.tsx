@@ -198,7 +198,7 @@ export function PricingCards() {
       description: "Ideal para emprendedores y freelancers",
       features: [
         "hasta 3 cuentas de correo",
-        "5 GB de almacenamiento total",
+        "1 GB de almacenamiento total",
         "Configuración completa",
         "Soporte por email",
         "Webmail incluido",
@@ -213,7 +213,7 @@ export function PricingCards() {
       description: "Perfecto para pequeñas y medianas empresas",
       features: [
         "hasta 10 cuentas de correo",
-        "15 GB de almacenamiento total",
+        "5 GB de almacenamiento total",
         "Configuración + migración",
         "Soporte prioritario (WhatsApp)",
         "Webmail + IMAP/SMTP",
@@ -228,7 +228,7 @@ export function PricingCards() {
       description: "Para empresas que necesitan escalabilidad",
       features: [
         "hasta 25 cuentas",
-        "50 GB de almacenamiento total",
+        "10 GB de almacenamiento total",
         "Migración completa + capacitación",
         "Soporte 24/7 (WhatsApp + Email)",
         "Webmail + IMAP/SMTP + API",
