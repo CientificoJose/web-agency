@@ -158,12 +158,14 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-y: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   overflow-x: hidden;
+  overflow-y: auto;
   line-height: 1.6;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -171,15 +173,6 @@ body {
 html,
 body {
   scroll-padding-top: 80px;
-}
-
-html {
-  overscroll-behavior: none;
-}
-
-body {
-  overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
 }
 
 /* Scrollbar personalizada */
