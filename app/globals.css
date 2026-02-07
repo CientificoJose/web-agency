@@ -333,3 +333,158 @@ img { max-width: 100%; height: auto; display: block; }
     scroll-behavior: auto;
   }
 }
+
+/* Estilos de impresión para evitar fondo negro */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Forzar fondo blanco en página */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+  
+  html {
+    background: white !important;
+    background-color: white !important;
+  }
+  
+  body {
+    background: white !important;
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Forzar fondo blanco en contenedor principal */
+  .min-h-screen {
+    min-height: auto !important;
+    background: white !important;
+    background-color: white !important;
+  }
+  
+  /* Forzar fondo blanco en todos los elementos de color */
+  .bg-gray-50, .bg-gray-100, .bg-blue-50, .bg-emerald-50, 
+  .bg-yellow-50, .bg-red-50, .bg-orange-50, .bg-white {
+    background: white !important;
+    background-color: white !important;
+  }
+  
+  /* Mantener colores de fondo de cajas informativas pero más suaves */
+  .border-blue-200.bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+  
+  .border-emerald-200.bg-emerald-50 {
+    background-color: #ecfdf5 !important;
+  }
+  
+  .border-yellow-200.bg-yellow-50 {
+    background-color: #fefce8 !important;
+  }
+  
+  .border-red-200.bg-red-50 {
+    background-color: #fef2f2 !important;
+  }
+  
+  /* Mantener bordes visibles */
+  .border, .border-gray-200, .border-blue-200, .border-emerald-200,
+  .border-yellow-200, .border-red-200, .border-orange-200 {
+    border-color: #d1d5db !important;
+    border-width: 1px !important;
+  }
+  
+  .border-2 {
+    border-width: 2px !important;
+  }
+  
+  /* Asegurar texto legible */
+  .text-gray-900, .text-gray-800, .text-gray-700 {
+    color: #111827 !important;
+  }
+  
+  .text-gray-600, .text-gray-500 {
+    color: #4b5563 !important;
+  }
+  
+  .text-blue-900, .text-blue-800 {
+    color: #1e3a8a !important;
+  }
+  
+  .text-emerald-900, .text-emerald-800 {
+    color: #064e3b !important;
+  }
+  
+  .text-yellow-900, .text-yellow-800 {
+    color: #713f12 !important;
+  }
+  
+  .text-red-900, .text-red-800 {
+    color: #7f1d1d !important;
+  }
+  
+  /* Ocultar elementos interactivos */
+  button, .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Ocultar scrollbar en impresión */
+  html::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  /* Remover sombras pero mantener estructura */
+  .shadow-lg, .shadow-xl, .shadow-md, .shadow-sm {
+    box-shadow: none !important;
+  }
+  
+  /* Mantener rounded corners */
+  .rounded-lg {
+    border-radius: 0.5rem !important;
+  }
+  
+  .rounded-full {
+    border-radius: 9999px !important;
+  }
+  
+  /* Asegurar que las imágenes se impriman */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* Evitar saltos de página en secciones */
+  section {
+    page-break-inside: avoid !important;
+  }
+  
+  /* Espaciado consistente */
+  .mb-8 {
+    margin-bottom: 2rem !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .p-8 {
+    padding: 2rem !important;
+  }
+  
+  .p-6 {
+    padding: 1.5rem !important;
+  }
+  
+  .p-4 {
+    padding: 1rem !important;
+  }
+}
