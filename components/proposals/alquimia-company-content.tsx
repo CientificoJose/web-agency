@@ -255,7 +255,7 @@ export function AlquimiaCompanyConfigurationSection() {
           <h3 className="mb-4 text-lg font-semibold text-gray-900 break-words">📧 Configuración en Gmail</h3>
           
           <p className="mb-4 text-sm text-gray-700">
-            Proceso simple para enviar y recibir correos desde su cuenta corporativa en Gmail:
+            Siga estos pasos para recibir y enviar correos desde su cuenta corporativa en Gmail:
           </p>
           
           <div className="space-y-4">
@@ -275,48 +275,67 @@ export function AlquimiaCompanyConfigurationSection() {
                   Vaya a la pestaña <strong>"Cuentas e importación"</strong>
                 </li>
                 <li>
-                  En la sección <strong>"Enviar correo como"</strong>, haga clic en <strong>"Añadir otra dirección de correo electrónico"</strong>
+                  En la sección <strong>"Consultar el correo de otras cuentas"</strong>, haga clic en <strong>"Añadir una cuenta de correo"</strong>
                 </li>
                 <li>
-                  En la ventana emergente:
-                  <ul className="ml-6 mt-2 list-disc space-y-1">
-                    <li>Ingrese su <strong>nombre</strong> (ej: Chef de Alquimia Company)</li>
-                    <li>Ingrese su <strong>correo corporativo completo en minúsculas</strong> (ej: <code>chef@alquimiacompany.com</code>)</li>
-                    <li>Marque <strong>"Tratar como alias"</strong> ✓</li>
-                    <li>Haga clic en <strong>"Siguiente paso"</strong></li>
-                  </ul>
+                  Ingrese su <strong>correo corporativo completo en minúsculas</strong> (ej: <code>chef@alquimiacompany.com</code>) y haga clic en <strong>"Siguiente"</strong>
                 </li>
                 <li>
-                  Configure el servidor SMTP con estos datos:
+                  Complete el formulario con los siguientes datos:
                 </li>
               </ol>
 
               <div className="mt-3 rounded-lg bg-gray-50 p-4">
                 <div className="grid gap-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Servidor SMTP:</span>
-                    <span className="font-mono font-semibold text-gray-900">mailserver.press-cloud.com</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Puerto:</span>
-                    <span className="font-mono font-semibold text-gray-900">587</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-gray-600">Nombre de usuario:</span>
-                    <span className="font-mono font-semibold text-gray-900">Su correo completo</span>
+                    <span className="font-mono font-semibold text-gray-900">Su correo completo en minúsculas</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Contraseña:</span>
                     <span className="font-mono font-semibold text-gray-900">Su contraseña</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Conexión segura:</span>
-                    <span className="font-mono font-semibold text-emerald-600">TLS ✓</span>
+                    <span className="text-gray-600">Servidor POP:</span>
+                    <span className="font-mono font-semibold text-gray-900">mailserver.press-cloud.com</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Puerto:</span>
+                    <span className="font-mono font-semibold text-gray-900">995</span>
                   </div>
                 </div>
               </div>
 
+              <div className="mt-3 rounded-lg border-2 border-emerald-200 bg-emerald-50 p-4">
+                <p className="mb-2 text-sm font-semibold text-emerald-900">✅ Marque TODAS estas opciones:</p>
+                <ul className="ml-6 list-none space-y-2 text-sm text-emerald-800">
+                  <li>☑️ <strong>Dejar una copia del mensaje recuperado en el servidor</strong></li>
+                  <li>☑️ <strong>Utilizar siempre una conexión segura (SSL) para recuperar mensajes de correo electrónico</strong></li>
+                  <li>☑️ <strong>Etiquetar los mensajes entrantes con:</strong> (seleccione su correo corporativo)</li>
+                  <li>☑️ <strong>Archivar los mensajes entrantes (omitir Recibidos)</strong></li>
+                </ul>
+              </div>
+
               <ol start={8} className="ml-6 mt-4 list-decimal space-y-3 text-sm text-gray-700">
+                <li>
+                  Haga clic en <strong>"Añadir cuenta"</strong>
+                </li>
+                <li>
+                  Gmail preguntará: <strong>"¿Desea poder enviar correo como [su correo]?"</strong> → Seleccione <strong>"Sí"</strong> ✅
+                </li>
+                <li>
+                  Ingrese su <strong>nombre</strong> (ej: Chef de Alquimia Company) y haga clic en <strong>"Siguiente paso"</strong>
+                </li>
+                <li>
+                  Gmail configurará automáticamente el servidor SMTP. Verifique que los datos sean:
+                  <ul className="ml-6 mt-2 list-disc space-y-1">
+                    <li><strong>Servidor SMTP:</strong> <code>mailserver.press-cloud.com</code></li>
+                    <li><strong>Puerto:</strong> <code>587</code></li>
+                    <li><strong>Usuario:</strong> Su correo completo en minúsculas</li>
+                    <li><strong>Contraseña:</strong> Su contraseña</li>
+                    <li><strong>Conexión segura:</strong> TLS ✓</li>
+                  </ul>
+                </li>
                 <li>
                   Haga clic en <strong>"Agregar cuenta"</strong>
                 </li>
@@ -329,21 +348,17 @@ export function AlquimiaCompanyConfigurationSection() {
                 <li>
                   Pegue el código en Gmail y haga clic en <strong>"Verificar"</strong>
                 </li>
+                <li>
+                  Gmail preguntará: <strong>"¿Desea enviar un correo de prueba?"</strong> → Seleccione <strong>"Sí"</strong> ✅ para confirmar que todo funciona
+                </li>
               </ol>
-            </div>
-
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <p className="text-sm text-blue-800">
-                💡 <strong>Tip:</strong> Este proceso configura automáticamente tanto el <strong>envío</strong> como la 
-                <strong> recepción</strong> de correos. No necesita configurar POP3/IMAP por separado.
-              </p>
             </div>
 
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
               <h4 className="mb-2 font-semibold text-emerald-900">🎉 ¡Listo!</h4>
               <p className="text-sm text-emerald-800">
                 Ahora puede <strong>enviar y recibir</strong> correos desde su cuenta corporativa directamente en Gmail. 
-                Los correos llegarán automáticamente a su bandeja de entrada.
+                Los correos llegarán automáticamente a su bandeja de entrada con la etiqueta que configuró.
               </p>
             </div>
           </div>
