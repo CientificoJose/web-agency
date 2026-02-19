@@ -163,17 +163,17 @@ export function AlquimiaCompanyInvoiceSection() {
 export function AlquimiaCompanyCredentialsSection() {
   const credentials = [
     {
-      email: "Chef@alquimiaCompany.com",
+      email: "chef@alquimiacompany.com",
       password: "AlquimiacompanyChef2026",
       description: "Cuenta de Chef",
     },
     {
-      email: "Gerencia@alquimiaCompany.com",
+      email: "gerencia@alquimiacompany.com",
       password: "AlquimiacompanyGerencia2026",
       description: "Cuenta de Gerencia",
     },
     {
-      email: "Admin@alquimiaCompany.com",
+      email: "admin@alquimiacompany.com",
       password: "Alquimiacompany2026",
       description: "Cuenta de Administración",
     },
@@ -182,7 +182,19 @@ export function AlquimiaCompanyCredentialsSection() {
   return (
     <section className="mb-8">
       <h2 className="mb-4 text-2xl font-bold text-gray-900 break-words">Credenciales de Acceso</h2>
-    
+      
+      <div className="mb-4 rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 text-orange-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-orange-900">⚠️ Importante: Sensible a Mayúsculas</p>
+            <p className="text-sm text-orange-800">
+              Los correos electrónicos deben escribirse <strong>exactamente en minúsculas</strong> al iniciar sesión en Gmail, 
+              Outlook, Thunderbird, Webmail o cualquier cliente de correo. El sistema distingue entre mayúsculas y minúsculas.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-4">
         {credentials.map((cred, idx) => (
@@ -233,7 +245,7 @@ export function AlquimiaCompanyConfigurationSection() {
           <p className="mb-2 text-sm font-semibold text-gray-900">Acceso Webmail:</p>
           <p className="font-mono text-lg font-bold text-emerald-600">https://mailserver.press-cloud.com/webmail</p>
           <p className="mt-2 text-xs text-gray-600">
-            Ingrese con su correo completo y contraseña. Funciona desde cualquier navegador sin configuración adicional.
+            Ingrese con su <strong>correo completo en minúsculas</strong> y contraseña. Funciona desde cualquier navegador sin configuración adicional.
           </p>
         </div>
       </div>
@@ -269,7 +281,7 @@ export function AlquimiaCompanyConfigurationSection() {
                   En la ventana emergente:
                   <ul className="ml-6 mt-2 list-disc space-y-1">
                     <li>Ingrese su <strong>nombre</strong> (ej: Chef de Alquimia Company)</li>
-                    <li>Ingrese su <strong>correo corporativo completo</strong> (ej: <code>Chef@alquimiaCompany.com</code>)</li>
+                    <li>Ingrese su <strong>correo corporativo completo en minúsculas</strong> (ej: <code>chef@alquimiacompany.com</code>)</li>
                     <li>Marque <strong>"Tratar como alias"</strong> ✓</li>
                     <li>Haga clic en <strong>"Siguiente paso"</strong></li>
                   </ul>
