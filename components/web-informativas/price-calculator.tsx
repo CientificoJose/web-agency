@@ -204,3 +204,6 @@ export default function PriceCalculator() {
     </section>
   )
 }
+
+
+// TODO: ESTO ES UNA COPIA DEL PREVIO, HACE LO MISMO PERO CON UNA DIFERENCIA EN EL CALCULO DE PRECIOS
