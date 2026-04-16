@@ -190,7 +190,7 @@ export function ComparisonTable() {
 }
 
 export function PricingCards() {
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual" | "biennial">("monthly")
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual" | "biennial" | "five_years">("monthly")
 
   console.log("Current billing period:", billingPeriod)
 
@@ -254,13 +254,25 @@ export function PricingCards() {
         savings: `$${savings}`
       }
     }
-    const biennialPrice = monthlyPrice * 24 * 0.80
-    const savings = (monthlyPrice * 24 - biennialPrice).toFixed(2)
+    if (billingPeriod === "biennial") {
+      const biennialPrice = monthlyPrice * 24 * 0.80
+      const savings = (monthlyPrice * 24 - biennialPrice).toFixed(2)
+      return { 
+        price: biennialPrice.toFixed(2), 
+        period: "/2 años", 
+        total: `$${(monthlyPrice * 24).toFixed(2)}`,
+        discount: "20%",
+        savings: `$${savings}`
+      }
+    }
+    // 5 años con 30% de descuento
+    const quinquennialPrice = monthlyPrice * 60 * 0.70
+    const savings = (monthlyPrice * 60 - quinquennialPrice).toFixed(2)
     return { 
-      price: biennialPrice.toFixed(2), 
-      period: "/2 años", 
-      total: `$${(monthlyPrice * 24).toFixed(2)}`,
-      discount: "20%",
+      price: quinquennialPrice.toFixed(2), 
+      period: "/5 años", 
+      total: `$${(monthlyPrice * 60).toFixed(2)}`,
+      discount: "30%",
       savings: `$${savings}`
     }
   }
@@ -276,15 +288,10 @@ export function PricingCards() {
             Sin contratos largos. Cancela cuando quieras.
           </p>
           
-          <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white p-2 shadow-sm relative z-10">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 rounded-2xl md:rounded-full border border-gray-200 bg-white p-2 shadow-sm relative z-10">
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                console.log("Clicking monthly")
-                setBillingPeriod("monthly")
-              }}
+              onClick={() => setBillingPeriod("monthly")}
               className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
                 billingPeriod === "monthly"
                   ? "bg-primary text-white"
@@ -295,12 +302,7 @@ export function PricingCards() {
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                console.log("Clicking annual")
-                setBillingPeriod("annual")
-              }}
+              onClick={() => setBillingPeriod("annual")}
               className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
                 billingPeriod === "annual"
                   ? "bg-primary text-white"
@@ -312,12 +314,7 @@ export function PricingCards() {
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                console.log("Clicking biennial")
-                setBillingPeriod("biennial")
-              }}
+              onClick={() => setBillingPeriod("biennial")}
               className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
                 billingPeriod === "biennial"
                   ? "bg-primary text-white"
@@ -326,6 +323,18 @@ export function PricingCards() {
             >
               2 Años
               <span className="ml-1 text-xs">(-20%)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingPeriod("five_years")}
+              className={`rounded-full px-6 py-2 text-sm font-semibold transition cursor-pointer ${
+                billingPeriod === "five_years"
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              5 Años
+              <span className="ml-1 text-xs">(-30%)</span>
             </button>
           </div>
         </div>
