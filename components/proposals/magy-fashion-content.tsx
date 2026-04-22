@@ -35,12 +35,20 @@ export function MagyBillingHistorySection(): React.ReactElement {
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6">
       <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-4">1. Historial de pagos</h3>
-      <div className="bg-slate-50 p-4 rounded-xl text-sm md:text-base text-slate-700 space-y-2">
+      <div className="bg-slate-50 p-4 rounded-xl text-sm md:text-base text-slate-700 space-y-4">
         <p>
           Se confirma la recepción de <strong>USD 20</strong> equivalentes en <strong>USDT</strong> correspondientes al período de hosting <strong>1 de agosto 2025 – 31 de
           octubre 2025</strong>. El pago se acreditó en billetera Binance el día 27 de agosto de 2025.
         </p>
-        <p>Concepto cubierto: Hosting (trimestral) — ciclo Agosto 2025 / Octubre 2025.</p>
+        <div className="border-t border-slate-200 pt-3 space-y-2">
+          <p>
+            <span className="text-green-600">✅</span> <strong>USD 20 (USDT)</strong> — Ciclo Octubre 2025 / Enero 2026. Procesado vía Binance.
+          </p>
+          <p>
+            <span className="text-green-600">✅</span> <strong>USD 20 (USDT)</strong> — Ciclo Enero 2026 / Abril 2026. Pago confirmado.
+          </p>
+        </div>
+        <p className="text-xs text-slate-500 italic pt-2">Concepto: Hosting (trimestral) — ciclos procesados hasta Abril 2026.</p>
       </div>
     </section>
   )
@@ -51,11 +59,13 @@ export function MagyUpcomingChargesSection(): React.ReactElement {
     <section className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6">
       <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-4">2. Próximos cobros</h3>
       <div className="space-y-4 text-sm md:text-base text-slate-700">
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
+        <div className="bg-white p-4 rounded-xl border border-pink-200 shadow-sm">
           <h4 className="font-semibold text-slate-900 mb-1">Hosting (trimestral)</h4>
-          <p>
-            <span className="font-medium">27 de enero de 2026 — USD 20</span> correspondientes al ciclo <strong>Octubre 2025 / Enero 2026</strong>. Incluye renovación de
-            instancia y monitoreo básico.
+          <p className="mb-2">
+            <span className="font-medium text-pink-600 italic">⭕️ Proximo Cobro Hosting(Trimestre) - 27 de Abril - 20$ (Trimestre Abril2026/Julio2026)</span>
+          </p>
+          <p className="text-xs md:text-sm text-slate-600">
+            Incluye renovación de instancia, monitoreo de uptime y administración técnica del servidor.
           </p>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200">
