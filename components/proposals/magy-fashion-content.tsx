@@ -47,8 +47,11 @@ export function MagyBillingHistorySection(): React.ReactElement {
           <p>
             <span className="text-green-600">✅</span> <strong>USD 20 (USDT)</strong> — Ciclo Enero 2026 / Abril 2026. Pago confirmado.
           </p>
+          <p>
+            <span className="text-green-600">✅</span> <strong>USD 20 (USDT)</strong> — Ciclo Abril 2026 / Julio 2026. Pago confirmado.
+          </p>
         </div>
-        <p className="text-xs text-slate-500 italic pt-2">Concepto: Hosting (trimestral) — ciclos procesados hasta Abril 2026.</p>
+        <p className="text-xs text-slate-500 italic pt-2">Concepto: Hosting (trimestral) — ciclos procesados hasta Julio 2026.</p>
       </div>
     </section>
   )
@@ -62,7 +65,7 @@ export function MagyUpcomingChargesSection(): React.ReactElement {
         <div className="bg-white p-4 rounded-xl border border-pink-200 shadow-sm">
           <h4 className="font-semibold text-slate-900 mb-1">Hosting (trimestral)</h4>
           <p className="mb-2">
-            <span className="font-medium text-pink-600 italic">⭕️ Proximo Cobro Hosting(Trimestre) - 27 de Abril - 20$ (Trimestre Abril2026/Julio2026)</span>
+            <span className="font-medium text-pink-600 italic">⭕️ Proximo Cobro Hosting(Trimestre) - 27 de Julio - 20$ (Trimestre Julio2026/Octubre2026)</span>
           </p>
           <p className="text-xs md:text-sm text-slate-600">
             Incluye renovación de instancia, monitoreo de uptime y administración técnica del servidor.
@@ -71,7 +74,7 @@ export function MagyUpcomingChargesSection(): React.ReactElement {
         <div className="bg-white p-4 rounded-xl border border-slate-200">
           <h4 className="font-semibold text-slate-900 mb-1">Dominio (anual)</h4>
           <p>
-            <span className="font-medium">27 de mayo de 2026 — USD 50</span> correspondientes al período <strong>27 de mayo 2025 / 27 de mayo 2026</strong>. Incluye
+            <span className="font-medium">27 de mayo de 2026 — USD 50</span> correspondientes al período <strong>27 de mayo 2026 / 27 de mayo 2027</strong>. Incluye
             administración de DNS y renovación en el registrador.
           </p>
         </div>
