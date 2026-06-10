@@ -24,11 +24,11 @@ export function AlquimiaCompanySummarySection() {
           </div>
           <div>
             <p className="text-sm text-gray-600">Fecha de Inicio</p>
-            <p className="font-semibold text-gray-900">05 de Febrero, 2026</p>
+            <p className="font-semibold text-gray-900">05 de Mayo, 2026</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Duración del Servicio</p>
-            <p className="font-semibold text-gray-900">3 meses</p>
+            <p className="font-semibold text-gray-900">5 años</p>
           </div>
         </div>
       </div>
@@ -41,7 +41,7 @@ export function AlquimiaCompanyServiceSection() {
     <section className="mb-8">
       <h2 className="mb-4 text-2xl font-bold text-gray-900 break-words">Detalles del Servicio</h2>
       <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Plan Básico - 3 Meses</h3>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Plan Básico - 5 Años</h3>
         <ul className="space-y-3">
           <li className="flex items-start gap-3">
             <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
@@ -94,7 +94,7 @@ export function AlquimiaCompanyInvoiceSection() {
       <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6">
         <div className="mb-6">
           <p className="text-sm text-gray-600">Factura No.</p>
-          <p className="text-lg font-bold text-gray-900">ALQ-2026-001</p>
+          <p className="text-lg font-bold text-gray-900">ALQ-2026-002</p>
         </div>
 
         <div className="overflow-x-auto -mx-4 md:mx-0">
@@ -114,24 +114,12 @@ export function AlquimiaCompanyInvoiceSection() {
                     <div className="max-w-[200px] md:max-w-none">
                       Plan Básico - Correo Corporativo
                       <br />
-                      <span className="text-xs text-gray-500 whitespace-nowrap">(3 meses)</span>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">(5 años)</span>
                     </div>
                   </td>
                   <td className="py-3 text-right text-xs md:text-sm text-gray-700 whitespace-nowrap px-2">1</td>
-                  <td className="py-3 text-right text-xs md:text-sm text-gray-700 whitespace-nowrap px-2">$29.97</td>
-                  <td className="py-3 text-right text-xs md:text-sm font-semibold text-gray-900 whitespace-nowrap pl-2">$29.97</td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 text-xs md:text-sm text-gray-700 pr-4">
-                    <div className="max-w-[200px] md:max-w-none">
-                      Dominio alquimiaCompany.com
-                      <br />
-                      <span className="text-xs text-gray-500 whitespace-nowrap">(1 año)</span>
-                    </div>
-                  </td>
-                  <td className="py-3 text-right text-xs md:text-sm text-gray-700 whitespace-nowrap px-2">1</td>
-                  <td className="py-3 text-right text-xs md:text-sm text-gray-700 whitespace-nowrap px-2">$15.00</td>
-                  <td className="py-3 text-right text-xs md:text-sm font-semibold text-gray-900 whitespace-nowrap pl-2">$15.00</td>
+                  <td className="py-3 text-right text-xs md:text-sm text-gray-700 whitespace-nowrap px-2">$419.58</td>
+                  <td className="py-3 text-right text-xs md:text-sm font-semibold text-gray-900 whitespace-nowrap pl-2">$419.58</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -139,7 +127,7 @@ export function AlquimiaCompanyInvoiceSection() {
                   <td colSpan={3} className="pt-4 text-right text-sm md:text-lg font-bold text-gray-900 pr-2">
                     Total
                   </td>
-                  <td className="pt-4 text-right text-lg md:text-2xl font-bold text-primary whitespace-nowrap pl-2">$44.97</td>
+                  <td className="pt-4 text-right text-lg md:text-2xl font-bold text-primary whitespace-nowrap pl-2">$419.58</td>
                 </tr>
               </tfoot>
             </table>
@@ -152,8 +140,61 @@ export function AlquimiaCompanyInvoiceSection() {
             <p className="font-semibold text-emerald-900">Estado de Pago: PAGADO</p>
           </div>
           <p className="mt-2 text-sm text-emerald-800">
-            Pago recibido el 05/02/2026 por <strong>$44.97 USDT</strong> vía Binance
+            Pago recibido el 08/06/2026 por <strong>$419.58 USDT</strong> vía Binance
           </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function AlquimiaCompanyHistorySection() {
+  return (
+    <section className="mb-8">
+      <h2 className="mb-4 text-2xl font-bold text-gray-900 break-words">Historial de Servicio y Pagos</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="relative border-l border-gray-200 ml-3 space-y-8">
+          {/* Periodo 2 */}
+          <div className="relative pl-6">
+            <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary border border-white"></div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                Periodo Actual (Activo)
+              </span>
+              <span className="text-sm font-semibold text-primary">ALQ-2026-002</span>
+            </div>
+            <h3 className="mt-2 text-lg font-bold text-gray-900">Renovación de 5 Años</h3>
+            <p className="mt-1 text-sm text-gray-700">
+              <strong>Servicio:</strong> Correo Corporativo - Plan Básico
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Vigencia:</strong> 05 de Mayo, 2026 - 05 de Mayo, 2031
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Inversión:</strong> $419.58 USDT (Pagado el 08/06/2026 vía Binance)
+            </p>
+          </div>
+
+          {/* Periodo 1 */}
+          <div className="relative pl-6">
+            <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-gray-305 border border-white"></div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                Periodo Anterior (Finalizado)
+              </span>
+              <span className="text-sm font-semibold text-gray-500">ALQ-2026-001</span>
+            </div>
+            <h3 className="mt-2 text-lg font-bold text-gray-900">Contratación Inicial</h3>
+            <p className="mt-1 text-sm text-gray-700">
+              <strong>Servicio:</strong> Correo Corporativo - Plan Básico (3 meses) + Dominio alquimiaCompany.com (1 año)
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Vigencia:</strong> 05 de Febrero, 2026 - 05 de Mayo, 2026
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Inversión:</strong> $44.97 USDT (Pagado el 05/02/2026 vía Binance)
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -445,7 +486,7 @@ export function AlquimiaCompanyDatesSection() {
             </div>
             <div className="flex-1">
               <h3 className="mb-1 font-semibold text-gray-900">Inicio del Servicio</h3>
-              <p className="text-2xl font-bold text-primary">05 de Febrero, 2026</p>
+              <p className="text-2xl font-bold text-primary">05 de Mayo, 2026</p>
               <p className="mt-1 text-sm text-gray-600">Fecha de activación del servicio de correo corporativo</p>
             </div>
           </div>
@@ -458,9 +499,9 @@ export function AlquimiaCompanyDatesSection() {
             </div>
             <div className="flex-1">
               <h3 className="mb-1 font-semibold text-orange-900">Vencimiento del Servicio de Correo</h3>
-              <p className="text-2xl font-bold text-orange-600">05 de Mayo, 2026</p>
+              <p className="text-2xl font-bold text-orange-600">05 de Mayo, 2031</p>
               <p className="mt-1 text-sm text-orange-800">
-                El servicio de correo corporativo vence después de 3 meses. Para renovar, contacte con nosotros antes
+                El servicio de correo corporativo vence después de 5 años. Para renovar, contacte con nosotros antes
                 de esta fecha.
               </p>
             </div>
@@ -491,7 +532,7 @@ export function AlquimiaCompanyDatesSection() {
             <div className="flex-1">
               <h3 className="mb-1 font-semibold text-red-900">Política de Suspensión</h3>
               <p className="text-sm text-red-800">
-                Si no se renueva el servicio antes de la fecha de vencimiento (05/05/2026), el servicio de correo será
+                Si no se renueva el servicio antes de la fecha de vencimiento (05/05/2031), el servicio de correo será
                 suspendido automáticamente. Los correos no podrán ser enviados ni recibidos hasta que se realice el
                 pago de renovación.
               </p>

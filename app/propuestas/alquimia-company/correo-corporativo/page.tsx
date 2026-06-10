@@ -7,6 +7,7 @@ import {
   AlquimiaCompanySummarySection,
   AlquimiaCompanyServiceSection,
   AlquimiaCompanyInvoiceSection,
+  AlquimiaCompanyHistorySection,
   AlquimiaCompanyCredentialsSection,
   AlquimiaCompanyConfigurationSection,
   AlquimiaCompanyDatesSection,
@@ -323,6 +324,7 @@ function AlquimiaCompanyProposalPageInner() {
           <AlquimiaCompanySummarySection />
           <AlquimiaCompanyServiceSection />
           <AlquimiaCompanyInvoiceSection />
+          <AlquimiaCompanyHistorySection />
           <AlquimiaCompanyCredentialsSection />
           <AlquimiaCompanyConfigurationSection />
           <AlquimiaCompanyDatesSection />
