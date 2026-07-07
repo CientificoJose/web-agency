@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic"
 
 export default async function EditarPropuestaPage({ params }: EditarPropuestaPageProps) {
   const resolvedParams = await params
-  const { proposal, credentials } = await getProposalById(resolvedParams.id)
+  const { proposal, credentials, services, collaborators } = await getProposalById(resolvedParams.id)
   const catalog = await getCatalog()
 
   if (!proposal) {
@@ -21,6 +21,8 @@ export default async function EditarPropuestaPage({ params }: EditarPropuestaPag
     <EditarPropuestaClient
       proposal={proposal}
       initialCredentials={credentials}
+      initialServices={services}
+      initialCollaborators={collaborators}
       catalog={catalog}
     />
   )

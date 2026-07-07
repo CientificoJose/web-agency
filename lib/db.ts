@@ -1,6 +1,7 @@
 import sqlite3 from "sqlite3"
 import { open, Database } from "sqlite"
 import path from "path"
+import crypto from "crypto"
 
 let dbInstance: Database<sqlite3.Database, sqlite3.Statement> | null = null
 
@@ -46,16 +47,157 @@ export async function getDb() {
     )
   `)
 
-  // Migración en caliente: Añadir columnas category_name y features a proposals si no existen
+  // Migración en caliente: Añadir columnas category_name, features, grace_days, late_fee_percentage, daily_penalty_fee, brand_color_primary, brand_color_secondary, brand_logo_url
   const columns = await dbInstance.all("PRAGMA table_info(proposals)")
   const hasCategoryName = columns.some((col: any) => col.name === "category_name")
   const hasFeatures = columns.some((col: any) => col.name === "features")
+  const hasGraceDays = columns.some((col: any) => col.name === "grace_days")
+  const hasLateFeePct = columns.some((col: any) => col.name === "late_fee_percentage")
+  const hasDailyPenalty = columns.some((col: any) => col.name === "daily_penalty_fee")
+  const hasBrandColorPrimary = columns.some((col: any) => col.name === "brand_color_primary")
+  const hasBrandColorSecondary = columns.some((col: any) => col.name === "brand_color_secondary")
+  const hasBrandLogoUrl = columns.some((col: any) => col.name === "brand_logo_url")
 
   if (!hasCategoryName) {
     await dbInstance.run("ALTER TABLE proposals ADD COLUMN category_name TEXT")
   }
   if (!hasFeatures) {
     await dbInstance.run("ALTER TABLE proposals ADD COLUMN features TEXT")
+  }
+  if (!hasGraceDays) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN grace_days INTEGER DEFAULT 0")
+  }
+  if (!hasLateFeePct) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN late_fee_percentage REAL DEFAULT 0.0")
+  }
+  if (!hasDailyPenalty) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN daily_penalty_fee REAL DEFAULT 0.0")
+  }
+  if (!hasBrandColorPrimary) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN brand_color_primary TEXT")
+  }
+  if (!hasBrandColorSecondary) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN brand_color_secondary TEXT")
+  }
+  if (!hasBrandLogoUrl) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN brand_logo_url TEXT")
+  }
+
+  // Crear tabla settings
+  await dbInstance.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `)
+
+  // Poblar valores por defecto en settings
+  const settingsCount = await dbInstance.get<{ total: number }>("SELECT COUNT(*) as total FROM settings")
+  if (settingsCount && settingsCount.total === 0) {
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('brand_name', 'Sin Límites')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('brand_logo', '/recurso.png')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('color_primary', '#ff6600')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('color_secondary', '#0f172a')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('smtp_host', '')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('smtp_port', '587')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('smtp_user', '')")
+    await dbInstance.run("INSERT INTO settings (key, value) VALUES ('smtp_pass', '')")
+  }
+
+  // Crear tabla proposal_services
+  await dbInstance.exec(`
+    CREATE TABLE IF NOT EXISTS proposal_services (
+      id TEXT PRIMARY KEY,
+      proposal_id TEXT NOT NULL,
+      category_name TEXT,
+      service_name TEXT NOT NULL,
+      plan_name TEXT,
+      price REAL NOT NULL,
+      billing_type TEXT DEFAULT 'RECURRENT',
+      billing_cycle TEXT DEFAULT 'monthly',
+      features TEXT,
+      policies TEXT,
+      status TEXT DEFAULT 'ACTIVE',
+      start_date TEXT,
+      expiration_date TEXT,
+      suspension_date TEXT,
+      domain_included INTEGER DEFAULT 0,
+      domain_expiration TEXT,
+      FOREIGN KEY (proposal_id) REFERENCES proposals (id) ON DELETE CASCADE
+    )
+  `)
+
+  // Crear tabla proposal_payments
+  await dbInstance.exec(`
+    CREATE TABLE IF NOT EXISTS proposal_payments (
+      id TEXT PRIMARY KEY,
+      proposal_id TEXT NOT NULL,
+      invoice_number TEXT,
+      amount REAL NOT NULL,
+      payment_date TEXT,
+      payment_method TEXT,
+      description TEXT,
+      status TEXT DEFAULT 'PAGADO',
+      FOREIGN KEY (proposal_id) REFERENCES proposals (id) ON DELETE CASCADE
+    )
+  `)
+
+  // Crear tabla proposal_collaborators
+  await dbInstance.exec(`
+    CREATE TABLE IF NOT EXISTS proposal_collaborators (
+      id TEXT PRIMARY KEY,
+      proposal_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      role TEXT,
+      logo_url TEXT,
+      contact TEXT,
+      FOREIGN KEY (proposal_id) REFERENCES proposals (id) ON DELETE CASCADE
+    )
+  `)
+
+  // Migración en caliente: Portar propuestas existentes a proposal_services y proposal_payments
+  const existingServicesCount = await dbInstance.get<{ total: number }>("SELECT COUNT(*) as total FROM proposal_services")
+  if (existingServicesCount && existingServicesCount.total === 0) {
+    const oldProposals = await dbInstance.all("SELECT * FROM proposals")
+    for (const prop of oldProposals) {
+      const serviceId = crypto.randomUUID()
+      await dbInstance.run(`
+        INSERT INTO proposal_services (
+          id, proposal_id, category_name, service_name, plan_name, price,
+          billing_type, billing_cycle, features, status, start_date,
+          expiration_date, suspension_date, domain_included, domain_expiration
+        ) VALUES (?, ?, ?, ?, ?, ?, 'RECURRENT', 'annually', ?, 'ACTIVE', ?, ?, ?, ?, ?)
+      `, [
+        serviceId,
+        prop.id,
+        prop.category_name || "Alojamiento Web y Dominios",
+        prop.service_name,
+        prop.plan_name,
+        prop.price || 0,
+        prop.features || "",
+        prop.start_date || "",
+        prop.service_expiration || "",
+        prop.suspension_date || "",
+        prop.domain_included ? 1 : 0,
+        prop.domain_expiration || ""
+      ])
+
+      if (prop.payment_status === "PAGADO") {
+        const paymentId = crypto.randomUUID()
+        await dbInstance.run(`
+          INSERT INTO proposal_payments (
+            id, proposal_id, invoice_number, amount, payment_date, payment_method, description, status
+          ) VALUES (?, ?, ?, ?, ?, ?, 'Pago Inicial de Contrato', 'PAGADO')
+        `, [
+          paymentId,
+          prop.id,
+          prop.invoice_number || "FAC-INICIAL",
+          prop.payment_amount || prop.price || 0,
+          prop.payment_date || prop.start_date || "",
+          prop.payment_method || "Otro"
+        ])
+      }
+    }
   }
 
   // Inicializar tabla de credenciales
@@ -74,7 +216,8 @@ export async function getDb() {
   await dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      policies TEXT DEFAULT ''
     )
   `)
 
@@ -97,9 +240,24 @@ export async function getDb() {
       price REAL NOT NULL,
       duration TEXT NOT NULL,
       features TEXT NOT NULL,
+      policies TEXT,
       FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE
     )
   `)
+
+  // Migración en caliente: Añadir columna policies a service_plans si no existe
+  const servicePlansColumns = await dbInstance.all("PRAGMA table_info(service_plans)")
+  const hasPoliciesInPlans = servicePlansColumns.some((col: any) => col.name === "policies")
+  if (!hasPoliciesInPlans) {
+    await dbInstance.run("ALTER TABLE service_plans ADD COLUMN policies TEXT")
+  }
+
+  // Migración en caliente: Añadir columna policies a categories si no existe
+  const categoriesColumns = await dbInstance.all("PRAGMA table_info(categories)")
+  const hasPoliciesInCategories = categoriesColumns.some((col: any) => col.name === "policies")
+  if (!hasPoliciesInCategories) {
+    await dbInstance.run("ALTER TABLE categories ADD COLUMN policies TEXT DEFAULT ''")
+  }
 
   // Insertar datos semilla (Seeds) si las categorías están vacías
   const categoriesCount = await dbInstance.get<{ total: number }>("SELECT COUNT(*) as total FROM categories")

@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+Dockerfile
+.dockerignore
+database.db-journal
+database.db-shm
+database.db-wal

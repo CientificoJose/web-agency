@@ -10,11 +10,19 @@ export const dynamic = "force-dynamic"
 
 export default async function DynamicProposalPage({ params }: ProposalPageProps) {
   const resolvedParams = await params
-  const { proposal, credentials } = await getProposalById(resolvedParams.id)
+  const { proposal, credentials, services, payments, collaborators } = await getProposalById(resolvedParams.id)
 
   if (!proposal) {
     notFound()
   }
 
-  return <DynamicContractClient proposal={proposal} credentials={credentials} />
+  return (
+    <DynamicContractClient
+      proposal={proposal}
+      credentials={credentials}
+      services={services}
+      payments={payments}
+      collaborators={collaborators}
+    />
+  )
 }
