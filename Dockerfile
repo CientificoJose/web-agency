@@ -5,8 +5,8 @@ WORKDIR /app
 # Habilitar corepack para poder usar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar archivos de dependencias
-COPY package.json pnpm-lock.yaml* ./
+# Copiar archivos de dependencias e indicación de scripts permitidos (.npmrc)
+COPY package.json pnpm-lock.yaml* .npmrc* ./
 
 # Instalar dependencias
 RUN pnpm install
