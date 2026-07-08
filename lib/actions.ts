@@ -10,6 +10,7 @@ export interface Proposal {
   client_name: string
   client_company: string
   client_domain: string
+  client_email?: string
   service_name?: string
   plan_name?: string
   start_date?: string
@@ -75,6 +76,8 @@ export interface ProposalPayment {
   payment_method?: string
   description?: string
   status?: string
+  notes?: string
+  due_date?: string
 }
 
 export interface ProposalCollaborator {
@@ -135,25 +138,27 @@ export async function createProposal(
   proposalData: Omit<Proposal, "id" | "signature_image" | "signature_date" | "created_at">,
   credentialsData: Credential[],
   servicesData: ProposalService[],
-  collaboratorsData: ProposalCollaborator[]
+  collaboratorsData: ProposalCollaborator[],
+  paymentsData?: ProposalPayment[]
 ): Promise<string> {
   const db = await getDb()
   const id = crypto.randomUUID()
 
   await db.run(
     `INSERT INTO proposals (
-      id, client_name, client_company, client_domain,
+      id, client_name, client_company, client_domain, client_email,
       invoice_number, payment_status, payment_date, payment_method, payment_amount,
       brand_color_primary, brand_color_secondary, brand_logo_url,
       grace_days, late_fee_percentage, daily_penalty_fee,
       service_name, plan_name, start_date, duration, price,
       domain_included, domain_expiration, service_expiration, suspension_date, category_name, features
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       proposalData.client_name,
       proposalData.client_company,
       proposalData.client_domain || "",
+      proposalData.client_email || "",
       proposalData.invoice_number || "",
       proposalData.payment_status || "PENDIENTE",
       proposalData.payment_date || "",
@@ -218,12 +223,33 @@ export async function createProposal(
     )
   }
 
-  if (proposalData.payment_status === "PAGADO") {
+  if (paymentsData && paymentsData.length > 0) {
+    for (const pay of paymentsData) {
+      const paymentId = crypto.randomUUID()
+      await db.run(
+        `INSERT INTO proposal_payments (
+          id, proposal_id, invoice_number, amount, payment_date, payment_method, description, status, notes, due_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          paymentId,
+          id,
+          pay.invoice_number || proposalData.invoice_number || "FAC-INICIAL",
+          pay.amount || 0,
+          pay.payment_date || "",
+          pay.payment_method || "",
+          pay.description || "Cuota de Contrato",
+          pay.status || "PENDIENTE",
+          pay.notes || "",
+          pay.due_date || ""
+        ]
+      )
+    }
+  } else if (proposalData.payment_status === "PAGADO") {
     const paymentId = crypto.randomUUID()
     await db.run(
       `INSERT INTO proposal_payments (
-        id, proposal_id, invoice_number, amount, payment_date, payment_method, description, status
-      ) VALUES (?, ?, ?, ?, ?, ?, 'Pago Inicial de Contrato', 'PAGADO')`,
+        id, proposal_id, invoice_number, amount, payment_date, payment_method, description, status, notes, due_date
+      ) VALUES (?, ?, ?, ?, ?, ?, 'Pago Inicial de Contrato', 'PAGADO', '', '')`,
       [
         paymentId,
         id,
@@ -427,7 +453,8 @@ export async function updateProposal(
   proposalData: Omit<Proposal, "id" | "signature_image" | "signature_date" | "created_at">,
   credentialsData: Credential[],
   servicesData: ProposalService[],
-  collaboratorsData: ProposalCollaborator[]
+  collaboratorsData: ProposalCollaborator[],
+  paymentsData?: ProposalPayment[]
 ): Promise<void> {
   const db = await getDb()
   
@@ -436,6 +463,7 @@ export async function updateProposal(
       client_name = ?, 
       client_company = ?, 
       client_domain = ?, 
+      client_email = ?,
       invoice_number = ?, 
       payment_status = ?,
       payment_date = ?, 
@@ -463,6 +491,7 @@ export async function updateProposal(
       proposalData.client_name,
       proposalData.client_company,
       proposalData.client_domain || "",
+      proposalData.client_email || "",
       proposalData.invoice_number || "",
       proposalData.payment_status || "PENDIENTE",
       proposalData.payment_date || "",
@@ -541,6 +570,31 @@ export async function updateProposal(
         `INSERT INTO proposal_collaborators (id, proposal_id, name, role, logo_url, contact)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [colId, id, col.name, col.role || "", col.logo_url || "", col.contact || ""]
+      )
+    }
+  }
+
+  // Reemplazar pagos
+  if (paymentsData) {
+    await db.run("DELETE FROM proposal_payments WHERE proposal_id = ?", [id])
+    for (const pay of paymentsData) {
+      const paymentId = crypto.randomUUID()
+      await db.run(
+        `INSERT INTO proposal_payments (
+          id, proposal_id, invoice_number, amount, payment_date, payment_method, description, status, notes, due_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          paymentId,
+          id,
+          pay.invoice_number || proposalData.invoice_number || "FAC-INICIAL",
+          pay.amount || 0,
+          pay.payment_date || "",
+          pay.payment_method || "",
+          pay.description || "Cuota de Contrato",
+          pay.status || "PENDIENTE",
+          pay.notes || "",
+          pay.due_date || ""
+        ]
       )
     }
   }
@@ -796,7 +850,7 @@ export async function sendProposalEmail(proposalId: string): Promise<void> {
 
   await transporter.sendMail({
     from: `"${brandName}" <${smtpUser}>`,
-    to: proposal.client_domain || smtpUser,
+    to: proposal.client_email || proposal.client_domain || smtpUser,
     subject: `Propuesta de Servicios Comerciales - ${proposal.client_company}`,
     html: emailHTML
   })

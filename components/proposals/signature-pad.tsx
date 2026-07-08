@@ -97,7 +97,7 @@ export function SignatureBlock({
         {signatureImage && (
           <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
             <h4 className="font-semibold text-dark mb-3">Registro de aceptación</h4>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row print:flex-row print:items-center print:justify-between md:items-center md:justify-between gap-4">
               <div>
                 <p className="text-sm text-gray-600">Firmado digitalmente por</p>
                 <p className="text-base font-semibold text-gray-900">{signatureHolderName}</p>

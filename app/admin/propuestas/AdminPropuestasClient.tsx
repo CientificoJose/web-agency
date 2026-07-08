@@ -193,71 +193,7 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
     })
   }
 
-  // Detalle de Propuesta y Renovaciones
-  const [detailProposal, setDetailProposal] = useState<{
-    proposal: Proposal | null
-    credentials: Credential[]
-    services: ProposalService[]
-    payments: ProposalPayment[]
-    collaborators: ProposalCollaborator[]
-  } | null>(null)
-  const [showDetailModal, setShowDetailModal] = useState(false)
-  const [loadingDetail, setLoadingDetail] = useState(false)
 
-  // Registro de pago
-  const [payAmount, setPayAmount] = useState("")
-  const [payMethod, setPayMethod] = useState("Binance")
-  const [payDate, setPayDate] = useState("")
-  const [payInvoice, setPayInvoice] = useState("")
-  const [payDesc, setPayDesc] = useState("")
-
-  const handleOpenDetail = async (id: string) => {
-    setLoadingDetail(true)
-    try {
-      const data = await getProposalById(id)
-      setDetailProposal(data)
-      setShowDetailModal(true)
-
-      // Inicializar campos de pago
-      const totalAmount = data.services.reduce((acc, s) => acc + s.price, 0)
-      setPayAmount(totalAmount.toString())
-      setPayDate(new Date().toISOString().split("T")[0])
-      setPayInvoice(`FAC-${Date.now().toString().slice(-6)}`)
-      setPayDesc("Renovación de servicios de contrato")
-    } catch (err) {
-      toast.error("Error al cargar detalles de la propuesta")
-    } finally {
-      setLoadingDetail(false)
-    }
-  }
-
-  const handleRegisterPaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!payAmount || !detailProposal?.proposal) return
-    startTransition(async () => {
-      try {
-        await registerPayment(detailProposal.proposal!.id, {
-          amount: parseFloat(payAmount),
-          payment_method: payMethod,
-          payment_date: payDate,
-          invoice_number: payInvoice,
-          description: payDesc
-        })
-        toast.success("¡Pago registrado y servicios extendidos con éxito!")
-        
-        // Recargar detalle
-        const data = await getProposalById(detailProposal.proposal!.id)
-        setDetailProposal(data)
-        
-        // Resetear form
-        setPayAmount("")
-        setPayDesc("")
-        router.refresh()
-      } catch (err) {
-        toast.error("Error al registrar pago")
-      }
-    })
-  }
 
   // Estados de los Formularios de Catálogo
   const [newCatName, setNewCatName] = useState("")
@@ -543,15 +479,6 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  className="border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white cursor-pointer bg-slate-950"
-                                  title="Ver Detalles y Renovaciones"
-                                  onClick={() => handleOpenDetail(prop.id)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
                                 <Link href={`/propuestas-dinamicas/${prop.id}`} target="_blank">
                                   <Button
                                     size="icon"
@@ -1208,191 +1135,13 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
               </CardContent>
               <CardFooter className="justify-end border-t border-slate-900 pt-4 bg-slate-950/20">
                 <Button type="submit" disabled={isPending} className="bg-primary text-white hover:bg-primary/90 cursor-pointer">
-                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar Ajustes"}
+                  {isPending ? "Guardando..." : "Guardar Ajustes"}
                 </Button>
               </CardFooter>
             </form>
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* MODAL DETALLADO Y RENOVACIONES DE PROPUESTA */}
-      {showDetailModal && detailProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="relative bg-slate-950 border border-slate-800 rounded-xl max-w-3xl w-full p-6 text-white shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
-            <div className="flex justify-between items-start border-b border-slate-900 pb-4">
-              <div>
-                <h2 className="text-xl font-bold text-white">Detalle de Contrato / Propuesta</h2>
-                <p className="text-slate-400 text-xs mt-1">Cliente: {detailProposal.proposal?.client_company} ({detailProposal.proposal?.client_name})</p>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => setShowDetailModal(false)}
-                className="text-slate-400 hover:text-white text-lg p-1 bg-slate-900/50 hover:bg-slate-900 border border-slate-800 rounded"
-              >
-                ✕ Cerrar
-              </Button>
-            </div>
-
-            {/* Listado de Servicios */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-sm text-primary flex gap-2 items-center">
-                <Layers className="h-4 w-4" />
-                <span>Servicios y Estados de Facturación</span>
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                {detailProposal.services.map((ser, i) => (
-                  <div key={ser.id || i} className="bg-slate-900 p-4 border border-slate-850 rounded-lg flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-sm text-white">{ser.service_name}</span>
-                        <Badge
-                          className={
-                            ser.status === "ACTIVE"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-red-500/10 text-red-400 border border-red-500/20"
-                          }
-                        >
-                          {ser.status === "ACTIVE" ? "Activo" : "Suspendido"}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-slate-400">{ser.plan_name} • {ser.billing_type === "RECURRENT" ? `Recurrente (${ser.billing_cycle})` : "Proyecto (Costo Único)"}</p>
-                      <p className="text-xs text-slate-500 mt-1 font-mono">Inversión: ${ser.price.toFixed(2)}</p>
-                    </div>
-                    {ser.billing_type === "RECURRENT" && (
-                      <div className="mt-3 pt-2 border-t border-slate-850 text-slate-500 text-[10px] space-y-1">
-                        <div>Vencimiento: <span className="text-slate-300 font-semibold">{ser.expiration_date || "N/A"}</span></div>
-                        <div>Suspensión: <span className="text-slate-300 font-semibold">{ser.suspension_date || "N/A"}</span></div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Credenciales Entregadas */}
-            {detailProposal.credentials.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-bold text-sm text-slate-200 flex gap-2 items-center">
-                  <Award className="h-4 w-4 text-primary" />
-                  <span>Credenciales Registradas</span>
-                </h3>
-                <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-850 grid gap-2 md:grid-cols-2">
-                  {detailProposal.credentials.map((c, idx) => (
-                    <div key={idx} className="p-2 border border-slate-900 bg-slate-950 rounded text-xs space-y-1">
-                      <div className="font-bold text-slate-300">{c.description}</div>
-                      <div>User: <span className="font-mono text-slate-100">{c.email}</span></div>
-                      <div>Pass: <span className="font-mono text-slate-100">{c.password}</span></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="grid gap-6 md:grid-cols-2 border-t border-slate-900 pt-6">
-              {/* Historial de Pagos */}
-              <div className="space-y-3">
-                <h3 className="font-bold text-sm text-slate-200 flex gap-2 items-center">
-                  <CreditCard className="h-4 w-4 text-primary" />
-                  <span>Historial de Pagos</span>
-                </h3>
-                {detailProposal.payments.length === 0 ? (
-                  <p className="text-xs text-slate-500">No se han registrado pagos aún.</p>
-                ) : (
-                  <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                    {detailProposal.payments.map((p, idx) => (
-                      <div key={p.id || idx} className="bg-slate-900/50 p-2.5 rounded border border-slate-850 text-xs">
-                        <div className="flex justify-between font-bold text-slate-200">
-                          <span>{p.invoice_number}</span>
-                          <span className="text-emerald-400">${p.amount.toFixed(2)}</span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-1 flex justify-between">
-                          <span>{p.payment_method} • {p.payment_date}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 italic mt-0.5">{p.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Formulario Registrar Renovación */}
-              <div className="bg-slate-900/40 p-4 border border-slate-850 rounded-lg space-y-3">
-                <h3 className="font-bold text-sm text-white flex gap-1.5 items-center">
-                  <Plus className="h-4 w-4 text-primary" />
-                  <span>Registrar Renovación / Pago</span>
-                </h3>
-                <form onSubmit={handleRegisterPaymentSubmit} className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Monto Pagado ($) *</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={payAmount}
-                        onChange={e => setPayAmount(e.target.value)}
-                        className="bg-slate-950 border-slate-800 text-xs h-8"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Método *</Label>
-                      <Input
-                        value={payMethod}
-                        onChange={e => setPayMethod(e.target.value)}
-                        className="bg-slate-950 border-slate-800 text-xs h-8"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Fecha *</Label>
-                      <Input
-                        type="date"
-                        value={payDate}
-                        onChange={e => setPayDate(e.target.value)}
-                        className="bg-slate-950 border-slate-800 text-xs h-8"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Recibo # *</Label>
-                      <Input
-                        value={payInvoice}
-                        onChange={e => setPayInvoice(e.target.value)}
-                        className="bg-slate-950 border-slate-800 text-xs h-8"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-[10px]">Concepto / Nota</Label>
-                    <Input
-                      placeholder="Ej. Renovación mensual de Hosting"
-                      value={payDesc}
-                      onChange={e => setPayDesc(e.target.value)}
-                      className="bg-slate-950 border-slate-800 text-xs h-8"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isPending}
-                    className="w-full bg-primary text-white hover:bg-primary/90 h-8 text-xs cursor-pointer mt-2"
-                  >
-                    {isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                    Registrar Renovación
-                  </Button>
-                </form>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
 
       {/* MODAL EDITAR CATEGORÍA */}
       {showEditCategoryModal && editCategoryObj && (

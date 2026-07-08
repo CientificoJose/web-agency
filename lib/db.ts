@@ -27,6 +27,7 @@ export async function getDb() {
       client_name TEXT NOT NULL,
       client_company TEXT NOT NULL,
       client_domain TEXT,
+      client_email TEXT,
       service_name TEXT NOT NULL,
       plan_name TEXT,
       start_date TEXT,
@@ -81,6 +82,10 @@ export async function getDb() {
   }
   if (!hasBrandLogoUrl) {
     await dbInstance.run("ALTER TABLE proposals ADD COLUMN brand_logo_url TEXT")
+  }
+  const hasClientEmail = columns.some((col: any) => col.name === "client_email")
+  if (!hasClientEmail) {
+    await dbInstance.run("ALTER TABLE proposals ADD COLUMN client_email TEXT")
   }
 
   // Crear tabla settings
@@ -138,6 +143,8 @@ export async function getDb() {
       payment_method TEXT,
       description TEXT,
       status TEXT DEFAULT 'PAGADO',
+      notes TEXT,
+      due_date TEXT,
       FOREIGN KEY (proposal_id) REFERENCES proposals (id) ON DELETE CASCADE
     )
   `)
@@ -270,6 +277,17 @@ export async function getDb() {
   const hasDynamicFieldsInCredentials = credentialsColumns.some((col: any) => col.name === "dynamic_fields")
   if (!hasDynamicFieldsInCredentials) {
     await dbInstance.run("ALTER TABLE credentials ADD COLUMN dynamic_fields TEXT")
+  }
+
+  // Migración en caliente: Añadir columnas notes y due_date a proposal_payments si no existen
+  const proposalPaymentsColumns = await dbInstance.all("PRAGMA table_info(proposal_payments)")
+  const hasNotesInPayments = proposalPaymentsColumns.some((col: any) => col.name === "notes")
+  if (!hasNotesInPayments) {
+    await dbInstance.run("ALTER TABLE proposal_payments ADD COLUMN notes TEXT")
+  }
+  const hasDueDateInPayments = proposalPaymentsColumns.some((col: any) => col.name === "due_date")
+  if (!hasDueDateInPayments) {
+    await dbInstance.run("ALTER TABLE proposal_payments ADD COLUMN due_date TEXT")
   }
 
   // Insertar datos semilla (Seeds) si las categorías están vacías

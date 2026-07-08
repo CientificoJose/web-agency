@@ -238,6 +238,7 @@ export default function DynamicContractClient({
   }
 
   const totalProposalAmount = services.reduce((acc, curr) => acc + curr.price, 0)
+  const isRecurrent = services.some(s => s.billing_type === "RECURRENT")
 
   return (
     <div className="light min-h-screen bg-slate-100 py-8 print:bg-white print:py-0 text-slate-800 font-sans">
@@ -251,6 +252,39 @@ export default function DynamicContractClient({
         .bg-contract-primary { background-color: var(--primary-contract) !important; }
         .border-contract-primary { border-color: var(--primary-contract) !important; }
         .hover\\:bg-contract-primary-hover:hover { background-color: var(--primary-contract) !important; filter: brightness(90%); }
+        
+        @media print {
+          body {
+            background-color: white !important;
+            color: black !important;
+            font-size: 11pt !important;
+          }
+          /* Forzar vistas side-by-side en PDF/Impresión */
+          .print\\:flex-row {
+            flex-direction: row !important;
+          }
+          .print\\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+          .print\\:items-center {
+            align-items: center !important;
+          }
+          .print\\:w-full {
+            width: 100% !important;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+          /* Márgenes de A4 oficiales */
+          @page {
+            size: A4;
+            margin: 1.5cm;
+          }
+          /* Evitar saltos de página a mitad de una sección clave */
+          section, tr, .border, .card {
+            page-break-inside: avoid !important;
+          }
+        }
       `}} />
 
       <div className="container mx-auto max-w-4xl px-4 print:px-0">
@@ -296,7 +330,7 @@ export default function DynamicContractClient({
           </div>
 
           {/* DATOS PROVEEDOR & CLIENTE */}
-          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
             <div>
               <h3 className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Proveedor</h3>
               <p className="text-sm font-bold text-slate-800">{brandName}</p>
@@ -333,7 +367,7 @@ export default function DynamicContractClient({
                       : "border-transparent text-slate-500 hover:text-slate-800"
                   }`}
                 >
-                  Historial de Pagos
+                  {isRecurrent ? "Suscripción y Pagos" : "Historial de Pagos"}
                 </button>
                 {collaborators.length > 0 && (
                   <button
@@ -627,25 +661,60 @@ export default function DynamicContractClient({
                 </div>
               </section>
 
-              {/* Factura Resumen */}
+              {/* Factura Resumen y Cronograma de Pagos */}
               <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-900 flex gap-2 items-center">
                   <CreditCard className="h-5 w-5 text-contract-primary" />
-                  <span>Resumen de Cobro</span>
+                  <span>{isRecurrent ? "Resumen de Cobro y Suscripción" : "Resumen de Cobro y Cronograma de Pagos"}</span>
                 </h2>
-                <div className="border border-slate-200 rounded-xl p-5 space-y-4">
-                  <div className="flex justify-between text-sm text-slate-500">
-                    <span>Factura Nro:</span>
-                    <span className="font-bold text-slate-900">{proposal.invoice_number}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-slate-500">
-                    <span>Moneda de Pago:</span>
-                    <span className="font-bold text-slate-900">USD</span>
+                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 print:grid-cols-2">
+                  <div className="border border-slate-200 rounded-xl p-5 space-y-4 flex flex-col justify-between bg-white">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm text-slate-500">
+                        <span>Factura Nro:</span>
+                        <span className="font-bold text-slate-900">{proposal.invoice_number}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-slate-500">
+                        <span>Moneda de Pago:</span>
+                        <span className="font-bold text-slate-900">USD</span>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-4 flex justify-between items-center">
+                      <span className="font-bold text-slate-800 text-sm">Inversión Inicial Total:</span>
+                      <span className="text-xl font-black text-contract-primary">${totalProposalAmount.toFixed(2)} USD</span>
+                    </div>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-4 flex justify-between items-center">
-                    <span className="font-bold text-slate-800 text-lg">Inversión Inicial Total:</span>
-                    <span className="text-2xl font-black text-contract-primary">${totalProposalAmount.toFixed(2)} USD</span>
+                  <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-2.5 bg-white">
+                    <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">{isRecurrent ? "Renovaciones de Suscripción" : "Cuotas y Estados de Pago"}</h3>
+                    <div className="space-y-2">
+                      {payments.map((pay, i) => (
+                        <div key={pay.id || i} className="bg-white p-2.5 border border-slate-200 rounded-lg text-[11px] space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-slate-850">{pay.description}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                              pay.status === "PAGADO" ? "bg-emerald-100 text-emerald-800" : "bg-orange-100 text-orange-850"
+                            }`}>
+                              {pay.status}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-slate-500 text-[10px]">
+                            <span>Monto: <strong className="text-slate-800">${pay.amount.toFixed(2)} USD</strong></span>
+                            {pay.status === "PAGADO" ? (
+                              <span>Fecha: {displayFriendlyDate(pay.payment_date || "")}</span>
+                            ) : (
+                              <span>Vence: {displayFriendlyDate(pay.due_date || "")}</span>
+                            )}
+                          </div>
+                          {pay.notes && (
+                            <p className="text-[10px] text-slate-400 italic border-t pt-1 mt-1">
+                              <strong>Nota:</strong> {pay.notes}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </section>

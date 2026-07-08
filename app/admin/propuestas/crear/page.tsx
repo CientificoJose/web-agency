@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createProposal, getCatalog, CatalogCategory, Credential, ProposalService, ProposalCollaborator } from "@/lib/actions"
+import { createProposal, getCatalog, CatalogCategory, Credential, ProposalService, ProposalCollaborator, ProposalPayment } from "@/lib/actions"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Trash2, Plus, ArrowLeft, Loader2, Calendar } from "lucide-react"
+import { Trash2, Plus, ArrowLeft, Loader2, Calendar, ChevronDown, ChevronUp, CreditCard } from "lucide-react"
 import Link from "next/link"
 
 interface ServiceFormState {
@@ -40,6 +40,7 @@ export default function CrearPropuestaPage() {
   const [clientName, setClientName] = useState("")
   const [clientCompany, setClientCompany] = useState("")
   const [clientDomain, setClientDomain] = useState("")
+  const [clientEmail, setClientEmail] = useState("")
   const [invoiceNumber, setInvoiceNumber] = useState("")
   const [paymentStatus, setPaymentStatus] = useState("PENDIENTE")
   const [paymentDate, setPaymentDate] = useState("")
@@ -68,11 +69,26 @@ export default function CrearPropuestaPage() {
     password: string
     notes: string
     fields: { key: string; value: string }[]
+    showAdvanced?: boolean
   }
 
+  const [showCredentialsSection, setShowCredentialsSection] = useState(false)
   const [credentials, setCredentials] = useState<CredentialState[]>([
-    { description: "Cuenta de Administración", email: "", password: "", notes: "", fields: [] },
+    { description: "Cuenta de Administración", email: "", password: "", notes: "", fields: [], showAdvanced: false },
   ])
+
+  // Pagos / Cuotas
+  const [payments, setPayments] = useState<ProposalPayment[]>([
+    { description: "Pago Inicial / Único", amount: 0, status: "PENDIENTE", payment_date: "", payment_method: "Binance", notes: "", due_date: "" }
+  ])
+
+  // Sincronizar el monto del primer pago con la suma total de los servicios si solo hay 1 cuota
+  useEffect(() => {
+    const total = services.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0)
+    if (payments.length === 1) {
+      setPayments([{ ...payments[0], amount: total }])
+    }
+  }, [services])
 
   // Cargar catálogo e inicializar primer servicio
   useEffect(() => {
@@ -133,6 +149,7 @@ export default function CrearPropuestaPage() {
 
   const handleAddService = () => {
     const todayISO = new Date().toISOString().split("T")[0]
+    const defaultBillingType = services.length > 0 ? services[0].billing_type : "RECURRENT"
     setServices([
       ...services,
       {
@@ -143,7 +160,7 @@ export default function CrearPropuestaPage() {
         service_name: "",
         plan_name: "",
         price: "",
-        billing_type: "RECURRENT",
+        billing_type: defaultBillingType,
         billing_cycle: "monthly",
         features: "",
         policies: "",
@@ -261,7 +278,7 @@ export default function CrearPropuestaPage() {
 
   // Credenciales
   const handleAddCredential = () => {
-    setCredentials([...credentials, { description: "", email: "", password: "", notes: "", fields: [] }])
+    setCredentials([...credentials, { description: "", email: "", password: "", notes: "", fields: [], showAdvanced: false }])
   }
 
   const handleRemoveCredential = (index: number) => {
@@ -292,6 +309,21 @@ export default function CrearPropuestaPage() {
     setCredentials(updated)
   }
 
+  // Pagos / Cuotas
+  const handleAddPayment = () => {
+    setPayments([...payments, { description: `Cuota ${payments.length + 1}`, amount: 0, status: "PENDIENTE", payment_date: "", payment_method: "Binance", notes: "", due_date: "" }])
+  }
+
+  const handleRemovePayment = (index: number) => {
+    setPayments(payments.filter((_, i) => i !== index))
+  }
+
+  const handlePaymentChange = (index: number, key: keyof ProposalPayment, value: any) => {
+    const updated = [...payments]
+    updated[index] = { ...updated[index], [key]: value } as any
+    setPayments(updated)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!clientName || !clientCompany || services.some(s => !s.service_name || !s.price)) {
@@ -300,6 +332,14 @@ export default function CrearPropuestaPage() {
     }
 
     setLoading(true)
+
+    const hasRecurrent = services.some(s => s.billing_type === "RECURRENT")
+    const hasOneTime = services.some(s => s.billing_type === "ONE_TIME")
+    if (hasRecurrent && hasOneTime) {
+      toast.error("Un contrato no puede mezclar servicios recurrentes (Suscripción) con proyectos de pago único. Por favor, crea contratos independientes.")
+      setLoading(false)
+      return
+    }
 
     // Sumar montos
     let totalServicesPrice = 0
@@ -325,37 +365,41 @@ export default function CrearPropuestaPage() {
     })
 
     try {
-      await createProposal(
+      const id = await createProposal(
         {
           client_name: clientName,
           client_company: clientCompany,
           client_domain: clientDomain,
+          client_email: clientEmail,
           invoice_number: invoiceNumber,
-          payment_status: paymentStatus,
-          payment_date: paymentStatus === "PAGADO" ? paymentDate : "",
-          payment_method: paymentStatus === "PAGADO" ? paymentMethod : "",
-          payment_amount: paymentStatus === "PAGADO" ? totalServicesPrice : 0,
-          brand_color_primary: brandColorPrimary || undefined,
-          brand_color_secondary: brandColorSecondary || undefined,
-          brand_logo_url: brandLogoUrl || undefined,
+          payment_status: payments.every(p => p.status === "PAGADO") ? "PAGADO" : "PENDIENTE",
+          payment_date: payments[0]?.payment_date || "",
+          payment_method: payments[0]?.payment_method || "",
+          payment_amount: payments.reduce((acc, curr) => acc + (curr.amount || 0), 0),
+          brand_color_primary: undefined,
+          brand_color_secondary: undefined,
+          brand_logo_url: undefined,
           grace_days: parseInt(graceDays) || 0,
           late_fee_percentage: parseFloat(lateFeePercentage) || 0,
-          daily_penalty_fee: parseFloat(dailyPenaltyFee) || 0
+          daily_penalty_fee: 0
         },
-        credentials
-          .filter(c => c.email && c.password)
-          .map(c => ({
-            description: c.description,
-            email: c.email,
-            password: c.password,
-            notes: c.notes,
-            dynamic_fields: JSON.stringify(c.fields.reduce((acc, curr) => {
-              if (curr.key.trim()) acc[curr.key.trim()] = curr.value
-              return acc
-            }, {} as Record<string, string>))
-          })),
+        showCredentialsSection
+          ? credentials
+              .filter(c => c.email && c.password)
+              .map(c => ({
+                description: c.description,
+                email: c.email,
+                password: c.password,
+                notes: c.notes,
+                dynamic_fields: JSON.stringify(c.fields.reduce((acc, curr) => {
+                  if (curr.key.trim()) acc[curr.key.trim()] = curr.value
+                  return acc
+                }, {} as Record<string, string>))
+              }))
+          : [],
         mappedServices,
-        collaborators.filter(c => c.name)
+        collaborators.filter(c => c.name),
+        payments
       )
 
       toast.success("¡Propuesta y contrato multi-servicio creados con éxito!")
@@ -411,7 +455,7 @@ export default function CrearPropuestaPage() {
                 required
               />
             </div>
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <Label className="text-slate-300">Dominio de la Empresa</Label>
               <Input
                 placeholder="Ej. alquimiacompany.com"
@@ -420,61 +464,21 @@ export default function CrearPropuestaPage() {
                 className="bg-slate-900 border-slate-800 text-white placeholder:text-slate-600 focus:border-primary"
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* BRANDING PERSONALIZADO */}
-        <Card className="border-slate-800 bg-slate-950 text-white shadow-xl">
-          <CardHeader>
-            <CardTitle>2. Branding y Colores del Contrato (Opcional)</CardTitle>
-            <CardDescription className="text-slate-400">Personaliza la estética visual de esta propuesta</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label className="text-slate-300">Color Primario</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={brandColorPrimary || "#ff6600"}
-                  onChange={e => setBrandColorPrimary(e.target.value)}
-                  className="w-10 h-10 p-0 border border-slate-800 cursor-pointer rounded bg-transparent"
-                />
-                <Input
-                  placeholder="#ff6600"
-                  value={brandColorPrimary}
-                  onChange={e => setBrandColorPrimary(e.target.value)}
-                  className="bg-slate-900 border-slate-800 text-white"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-slate-300">Color Secundario</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={brandColorSecondary || "#0f172a"}
-                  onChange={e => setBrandColorSecondary(e.target.value)}
-                  className="w-10 h-10 p-0 border border-slate-800 cursor-pointer rounded bg-transparent"
-                />
-                <Input
-                  placeholder="#0f172a"
-                  value={brandColorSecondary}
-                  onChange={e => setBrandColorSecondary(e.target.value)}
-                  className="bg-slate-900 border-slate-800 text-white"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-slate-300">URL del Logotipo Cliente</Label>
+              <Label className="text-slate-300">Correo Electrónico del Cliente *</Label>
               <Input
-                placeholder="https://..."
-                value={brandLogoUrl}
-                onChange={e => setBrandLogoUrl(e.target.value)}
+                type="email"
+                placeholder="Ej. valentina@alquimiacompany.com"
+                value={clientEmail}
+                onChange={e => setClientEmail(e.target.value)}
                 className="bg-slate-900 border-slate-800 text-white placeholder:text-slate-600 focus:border-primary"
+                required
               />
             </div>
           </CardContent>
         </Card>
+
+
 
         {/* MOROSIDAD Y RECARGOS */}
         <Card className="border-slate-800 bg-slate-950 text-white shadow-xl">
@@ -504,17 +508,7 @@ export default function CrearPropuestaPage() {
                 className="bg-slate-900 border-slate-800 text-white"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-slate-300">Cargo Fijo por Día de Retraso ($)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={dailyPenaltyFee}
-                onChange={e => setDailyPenaltyFee(e.target.value)}
-                className="bg-slate-900 border-slate-800 text-white"
-              />
-            </div>
+
           </CardContent>
         </Card>
 
@@ -659,6 +653,7 @@ export default function CrearPropuestaPage() {
                       <Select
                         value={service.billing_type}
                         onValueChange={val => handleServiceChange(index, "billing_type", val)}
+                        disabled={index > 0}
                       >
                         <SelectTrigger className="bg-slate-900 border-slate-800">
                           <SelectValue />
@@ -668,6 +663,11 @@ export default function CrearPropuestaPage() {
                           <SelectItem value="ONE_TIME">Proyecto (Costo Único)</SelectItem>
                         </SelectContent>
                       </Select>
+                      {index > 0 && (
+                        <p className="text-[10px] text-slate-500 mt-1 italic">
+                          Heredado del primer servicio.
+                        </p>
+                      )}
                     </div>
 
                     {service.billing_type === "RECURRENT" && (
@@ -855,204 +855,338 @@ export default function CrearPropuestaPage() {
           </CardContent>
         </Card>
 
-        {/* FACTURA Y PAGO INICIAL */}
+        {/* FACTURA Y CRONOGRAMA DE PAGOS */}
         <Card className="border-slate-800 bg-slate-950 text-white shadow-xl">
-          <CardHeader>
-            <CardTitle>6. Factura y Pago Inicial</CardTitle>
-            <CardDescription className="text-slate-400">Registra el estado del cobro de la propuesta</CardDescription>
+          <CardHeader className="flex flex-row justify-between items-center">
+            <div>
+              <CardTitle className="flex gap-2 items-center">
+                <CreditCard className="h-5 w-5 text-primary" />
+                <span>{services.some(s => s.billing_type === "RECURRENT") ? "6. Facturación y Cronograma de Suscripción" : "6. Facturación y Cronograma de Pagos / Hitos"}</span>
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                {services.some(s => s.billing_type === "RECURRENT") ? "Define los ciclos de renovación y cobros de la suscripción" : "Define las cuotas, fechas de vencimiento y notas para cada hito de pago"}
+              </CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddPayment}
+              className="flex gap-1 border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 hover:text-white cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              {services.some(s => s.billing_type === "RECURRENT") ? "Agregar Renovación" : "Agregar Cuota / Hito"}
+            </Button>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label className="text-slate-300">Número de Factura *</Label>
+          <CardContent className="space-y-4">
+            <div className="space-y-2 max-w-sm mb-4">
+              <Label className="text-slate-300">Número de Factura General *</Label>
               <Input
                 placeholder="Ej. ALQ-2026-002"
                 value={invoiceNumber}
                 onChange={e => setInvoiceNumber(e.target.value)}
-                className="bg-slate-900 border-slate-800 focus:border-primary"
+                className="bg-slate-900 border-slate-800 focus:border-primary text-xs h-9"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-slate-300">Estado del Pago</Label>
-              <Select value={paymentStatus} onValueChange={setPaymentStatus}>
-                <SelectTrigger className="bg-slate-950 border-slate-800">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-950 border-slate-800 text-white">
-                  <SelectItem value="PENDIENTE">PENDIENTE</SelectItem>
-                  <SelectItem value="PAGADO">PAGADO</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-4">
+              {payments.map((pay, index) => (
+                <div key={index} className="p-4 border border-slate-900 rounded-lg bg-slate-900/10 space-y-3 relative">
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
+                    <span className="text-xs font-bold text-slate-400">
+                      {services.some(s => s.billing_type === "RECURRENT") ? `Ciclo / Cuota #${index + 1}` : `Hito / Cuota #${index + 1}`}
+                    </span>
+                    {payments.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemovePayment(index)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-950/20 h-7 w-7 cursor-pointer animate-fade-in"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-slate-300 text-[10px]">Concepto / Descripción *</Label>
+                      <Input
+                        placeholder={services.some(s => s.billing_type === "RECURRENT") ? "Ej. Suscripción Mensual" : "Ej. Pago Inicial (50%)"}
+                        value={pay.description}
+                        onChange={e => handlePaymentChange(index, "description", e.target.value)}
+                        className="bg-slate-900 border-slate-800 text-xs h-8"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-slate-300 text-[10px]">Monto ($ USD) *</Label>
+                      <Input
+                        type="number"
+                        placeholder="Ej. 250"
+                        value={pay.amount || ""}
+                        onChange={e => handlePaymentChange(index, "amount", parseFloat(e.target.value) || 0)}
+                        className="bg-slate-900 border-slate-800 text-xs h-8"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-slate-300 text-[10px]">Estado</Label>
+                      <Select 
+                        value={pay.status} 
+                        onValueChange={val => {
+                          handlePaymentChange(index, "status", val)
+                          if (val === "PENDIENTE") {
+                            handlePaymentChange(index, "payment_date", "")
+                            handlePaymentChange(index, "payment_method", "")
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="bg-slate-950 border-slate-800 text-xs h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-950 border-slate-800 text-white">
+                          <SelectItem value="PENDIENTE">PENDIENTE</SelectItem>
+                          <SelectItem value="PAGADO">PAGADO</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-slate-300 text-[10px]">Fecha Vencimiento (Cuota)</Label>
+                      <Input
+                        type="date"
+                        value={pay.due_date || ""}
+                        onChange={e => handlePaymentChange(index, "due_date", e.target.value)}
+                        className="bg-slate-900 border-slate-800 text-xs h-8"
+                      />
+                    </div>
+                  </div>
+
+                  {pay.status === "PAGADO" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-900/40">
+                      <div className="space-y-1">
+                        <Label className="text-slate-300 text-[10px]">Método de Pago</Label>
+                        <Input
+                          placeholder="Ej. Binance (USDT), Stripe, Transferencia"
+                          value={pay.payment_method || ""}
+                          onChange={e => handlePaymentChange(index, "payment_method", e.target.value)}
+                          className="bg-slate-900 border-slate-800 text-xs h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-slate-300 text-[10px]">Fecha de Pago</Label>
+                        <Input
+                          type="date"
+                          value={pay.payment_date || ""}
+                          onChange={e => handlePaymentChange(index, "payment_date", e.target.value)}
+                          className="bg-slate-900 border-slate-800 text-xs h-8"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <Label className="text-slate-300 text-[10px]">Nota de la Transacción / Referencia</Label>
+                    <Input
+                      placeholder="Ej. Transferencia recibida banco mercantil Nro #1849"
+                      value={pay.notes || ""}
+                      onChange={e => handlePaymentChange(index, "notes", e.target.value)}
+                      className="bg-slate-900 border-slate-800 text-xs h-8"
+                    />
+                  </div>
+
+                </div>
+              ))}
             </div>
 
-            {paymentStatus === "PAGADO" && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-slate-300">Método de Pago</Label>
-                  <Input
-                    placeholder="Ej. Binance (USDT), Pago Móvil, Stripe"
-                    value={paymentMethod}
-                    onChange={e => setPaymentMethod(e.target.value)}
-                    className="bg-slate-900 border-slate-800"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-300">Fecha de Recepción del Pago</Label>
-                  <Input
-                    type="date"
-                    value={paymentDate}
-                    onChange={e => setPaymentDate(e.target.value)}
-                    className="bg-slate-900 border-slate-800 focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label className="text-slate-300">Monto de Pago Inicial Recibido ($ USD)</Label>
-                  <Input
-                    type="text"
-                    disabled
-                    value={services.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0).toFixed(2)}
-                    className="bg-slate-950 border-slate-800 text-slate-400 opacity-80"
-                  />
-                  <p className="text-xs text-slate-500">El pago inicial se calcula automáticamente como la suma de todos los servicios agregados.</p>
-                </div>
-              </>
+            <div className="pt-2 flex justify-between items-center text-xs text-slate-400">
+              <span>Suma Total Cuotas:</span>
+              <span className="font-bold text-white text-sm">
+                ${payments.reduce((acc, curr) => acc + (curr.amount || 0), 0).toFixed(2)} USD
+              </span>
+            </div>
+            {Math.abs(payments.reduce((acc, curr) => acc + (curr.amount || 0), 0) - services.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0)) > 0.01 && (
+              <p className="text-[10px] text-orange-400">
+                Aviso: La suma total de las cuotas (${payments.reduce((acc, curr) => acc + (curr.amount || 0), 0).toFixed(2)}) no coincide con la suma de los servicios (${services.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0).toFixed(2)}).
+              </p>
             )}
           </CardContent>
         </Card>
 
-        {/* CREDENCIALES */}
+        {/* CREDENCIALES (OPCIONAL Y COLAPSABLE) */}
         <Card className="border-slate-800 bg-slate-950 text-white shadow-xl">
           <CardHeader className="flex flex-row justify-between items-center">
             <div>
               <CardTitle>7. Credenciales de Acceso (Opcional)</CardTitle>
               <CardDescription className="text-slate-400">Cuentas que se le entregarán al cliente una vez firme</CardDescription>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddCredential}
-              className="flex gap-1 border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 hover:text-white cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              Agregar
-            </Button>
+            <div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={showCredentialsSection} 
+                  onChange={e => setShowCredentialsSection(e.target.checked)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                <span className="ml-2 text-xs font-semibold text-slate-300">Habilitar</span>
+              </label>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {credentials.map((cred, index) => (
-              <div key={index} className="p-5 border border-slate-800 rounded-xl bg-slate-900/10 space-y-4 relative">
-                
-                {/* Cabecera de la cuenta y botón Eliminar */}
-                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
-                  <h4 className="font-bold text-sm text-primary">Credencial #{index + 1}</h4>
-                  {credentials.length > 1 && (
+          
+          {showCredentialsSection && (
+            <CardContent className="space-y-6 border-t border-slate-900 pt-4">
+              <div className="flex justify-end mb-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddCredential}
+                  className="flex gap-1 border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 hover:text-white cursor-pointer h-8 text-xs"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar Cuenta
+                </Button>
+              </div>
+
+              {credentials.map((cred, index) => (
+                <div key={index} className="p-5 border border-slate-800 rounded-xl bg-slate-900/10 space-y-4 relative">
+                  
+                  {/* Cabecera de la cuenta y botón Eliminar */}
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                    <h4 className="font-bold text-xs text-primary">Cuenta #{index + 1}</h4>
+                    {credentials.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer h-7 text-xs"
+                        onClick={() => handleRemoveCredential(index)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Campos Principales */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-slate-300 text-xs">Descripción / Nombre</Label>
+                      <Input
+                        placeholder="Ej. Hosting de Producción"
+                        value={cred.description}
+                        onChange={e => handleCredentialChange(index, "description", e.target.value)}
+                        className="bg-slate-900 border-slate-800 text-xs h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-slate-300 text-xs">Email / Usuario Principal *</Label>
+                      <Input
+                        placeholder="Ej. admin@tumarca.com"
+                        value={cred.email}
+                        onChange={e => handleCredentialChange(index, "email", e.target.value)}
+                        className="bg-slate-900 border-slate-800 text-xs h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-slate-300 text-xs">Contraseña Principal *</Label>
+                      <Input
+                        placeholder="Ej. ClaveSecreta123"
+                        value={cred.password}
+                        onChange={e => handleCredentialChange(index, "password", e.target.value)}
+                        className="bg-slate-900 border-slate-800 text-xs h-9"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Botón para abrir Configuración Avanzada de esta Cuenta */}
+                  <div className="pt-2">
                     <Button
                       type="button"
-                      variant="destructive"
+                      variant="ghost"
                       size="sm"
-                      className="bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer h-7 text-xs"
-                      onClick={() => handleRemoveCredential(index)}
+                      onClick={() => handleCredentialChange(index, "showAdvanced", !cred.showAdvanced)}
+                      className="text-xs text-slate-400 hover:text-white flex items-center gap-1 p-0 h-auto bg-transparent hover:bg-transparent cursor-pointer"
                     >
-                      <Trash2 className="h-3.5 w-3.5 mr-1" />
-                      Eliminar Cuenta
-                    </Button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300 text-xs">Descripción / Nombre</Label>
-                    <Input
-                      placeholder="Ej. Hosting de Producción"
-                      value={cred.description}
-                      onChange={e => handleCredentialChange(index, "description", e.target.value)}
-                      className="bg-slate-900 border-slate-800 text-xs h-9"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300 text-xs">Email / Usuario Principal *</Label>
-                    <Input
-                      placeholder="Ej. admin@tumarca.com"
-                      value={cred.email}
-                      onChange={e => handleCredentialChange(index, "email", e.target.value)}
-                      className="bg-slate-900 border-slate-800 text-xs h-9"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300 text-xs">Contraseña Principal *</Label>
-                    <Input
-                      placeholder="Ej. ClaveSecreta123"
-                      value={cred.password}
-                      onChange={e => handleCredentialChange(index, "password", e.target.value)}
-                      className="bg-slate-900 border-slate-800 text-xs h-9"
-                    />
-                  </div>
-                </div>
-
-                {/* CAMPOS PERSONALIZADOS REPETIDOR */}
-                <div className="space-y-3 pt-2 border-t border-slate-900/50">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-400">Campos Adicionales / Personalizados</span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddCredentialField(index)}
-                      className="h-7 text-[10px] border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 cursor-pointer"
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Agregar Campo
+                      {cred.showAdvanced ? <ChevronUp className="h-3.5 w-3.5 animate-bounce" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                      <span>Configuración avanzada y notas de acceso</span>
                     </Button>
                   </div>
 
-                  {cred.fields.length === 0 ? (
-                    <p className="text-[10px] text-slate-500 italic">No se han agregado campos personalizados.</p>
-                  ) : (
-                    <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-                      {cred.fields.map((fld, fldIdx) => (
-                        <div key={fldIdx} className="flex gap-2 items-center bg-slate-900/20 p-2 rounded-lg border border-slate-900/40">
-                          <Input
-                            placeholder="Ej. Servidor"
-                            value={fld.key}
-                            onChange={e => handleCredentialFieldChange(index, fldIdx, "key", e.target.value)}
-                            className="bg-slate-900 border-slate-800 text-xs h-8 w-1/3"
-                          />
-                          <Input
-                            placeholder="Ej. mail.tumarca.com"
-                            value={fld.value}
-                            onChange={e => handleCredentialFieldChange(index, fldIdx, "value", e.target.value)}
-                            className="bg-slate-900 border-slate-800 text-xs h-8 flex-1"
-                          />
+                  {cred.showAdvanced && (
+                    <div className="space-y-4 pt-3 border-t border-slate-900/60 bg-slate-950/20 p-3 rounded-lg border border-slate-900/40">
+                      
+                      {/* CAMPOS PERSONALIZADOS REPETIDOR */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Campos Adicionales / Personalizados</span>
                           <Button
                             type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveCredentialField(index, fldIdx)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-950/20 h-7 w-7 cursor-pointer"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddCredentialField(index)}
+                            className="h-6 text-[9px] border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 cursor-pointer"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Plus className="h-2.5 w-2.5 mr-1" />
+                            Agregar Campo
                           </Button>
                         </div>
-                      ))}
+
+                        {cred.fields.length === 0 ? (
+                          <p className="text-[10px] text-slate-500 italic">No se han agregado campos personalizados.</p>
+                        ) : (
+                          <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                            {cred.fields.map((fld, fldIdx) => (
+                              <div key={fldIdx} className="flex gap-2 items-center bg-slate-900/20 p-1.5 rounded-lg border border-slate-900/40">
+                                <Input
+                                  placeholder="Campo (ej. Servidor)"
+                                  value={fld.key}
+                                  onChange={e => handleCredentialFieldChange(index, fldIdx, "key", e.target.value)}
+                                  className="bg-slate-900 border-slate-800 text-[10px] h-7 w-1/3"
+                                />
+                                <Input
+                                  placeholder="Valor (ej. mail.tumarca.com)"
+                                  value={fld.value}
+                                  onChange={e => handleCredentialFieldChange(index, fldIdx, "value", e.target.value)}
+                                  className="bg-slate-900 border-slate-800 text-[10px] h-7 flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveCredentialField(index, fldIdx)}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-950/20 h-6 w-6 cursor-pointer"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* NOTAS / COMENTARIOS */}
+                      <div className="space-y-1.5 pt-2 border-t border-slate-900/50">
+                        <Label className="text-slate-300 text-xs">Nota de Acceso / Instrucciones</Label>
+                        <textarea
+                          placeholder="Escribe aquí cualquier aclaración, instrucción, URL del panel o aclaratoria..."
+                          value={cred.notes}
+                          onChange={e => handleCredentialChange(index, "notes", e.target.value)}
+                          rows={2}
+                          className="w-full rounded-md border border-slate-800 bg-slate-900 p-2.5 text-xs text-white focus:ring-1 focus:ring-primary font-sans leading-relaxed"
+                        />
+                      </div>
+
                     </div>
                   )}
-                </div>
 
-                {/* NOTAS / COMENTARIOS */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-900/50">
-                  <Label className="text-slate-300 text-xs">Nota de Acceso / Comentario Instructivo</Label>
-                  <textarea
-                    placeholder="Escribe aquí cualquier aclaración, instrucción, URL del panel de control o nota importante..."
-                    value={cred.notes}
-                    onChange={e => handleCredentialChange(index, "notes", e.target.value)}
-                    rows={2}
-                    className="w-full rounded-md border border-slate-800 bg-slate-900 p-2.5 text-xs text-white focus:ring-1 focus:ring-primary font-sans leading-relaxed"
-                  />
                 </div>
-
-              </div>
-            ))}
-          </CardContent>
+              ))}
+            </CardContent>
+          )}
         </Card>
 
         <div className="flex justify-end gap-3 pb-8">
