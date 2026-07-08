@@ -2,8 +2,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Habilitar corepack para poder usar pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Habilitar corepack y fijar pnpm a la versión 10 (compatible con .npmrc)
+RUN corepack enable && corepack prepare pnpm@10 --activate
 
 # Copiar archivos de dependencias e indicación de scripts permitidos (.npmrc)
 COPY package.json pnpm-lock.yaml* .npmrc* ./
