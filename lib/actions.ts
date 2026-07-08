@@ -3,6 +3,7 @@
 import { getDb } from "./db"
 import { revalidatePath } from "next/cache"
 import crypto from "crypto"
+import nodemailer from "nodemailer"
 
 export interface Proposal {
   id: string
@@ -41,6 +42,8 @@ export interface Credential {
   description: string
   email: string
   password: string
+  notes?: string
+  dynamic_fields?: string
 }
 
 export interface ProposalService {
@@ -107,7 +110,7 @@ export async function getProposalById(id: string): Promise<{
     return { proposal: null, credentials: [], services: [], payments: [], collaborators: [] }
   }
   const credentials = await db.all<Credential[]>(
-    "SELECT description, email, password FROM credentials WHERE proposal_id = ?",
+    "SELECT description, email, password, notes, dynamic_fields FROM credentials WHERE proposal_id = ?",
     [id]
   )
   const services = await db.all<ProposalService[]>(
@@ -180,8 +183,8 @@ export async function createProposal(
   for (const cred of credentialsData) {
     if (cred.email && cred.password) {
       await db.run(
-        "INSERT INTO credentials (proposal_id, description, email, password) VALUES (?, ?, ?, ?)",
-        [id, cred.description || "", cred.email, cred.password]
+        "INSERT INTO credentials (proposal_id, description, email, password, notes, dynamic_fields) VALUES (?, ?, ?, ?, ?, ?)",
+        [id, cred.description || "", cred.email, cred.password, cred.notes || "", cred.dynamic_fields || ""]
       )
     }
   }
@@ -492,8 +495,8 @@ export async function updateProposal(
   for (const cred of credentialsData) {
     if (cred.email && cred.password) {
       await db.run(
-        "INSERT INTO credentials (proposal_id, description, email, password) VALUES (?, ?, ?, ?)",
-        [id, cred.description || "", cred.email, cred.password]
+        "INSERT INTO credentials (proposal_id, description, email, password, notes, dynamic_fields) VALUES (?, ?, ?, ?, ?, ?)",
+        [id, cred.description || "", cred.email, cred.password, cred.notes || "", cred.dynamic_fields || ""]
       )
     }
   }
@@ -668,6 +671,135 @@ export async function updateServicePlan(
     [name, price, duration, features, policies, id]
   )
   revalidatePath("/admin/propuestas")
+}
+
+export async function sendTestEmail(toEmail: string): Promise<void> {
+  const db = await getDb()
+  const settingsRows = await db.all<{ key: string; value: string }[]>("SELECT * FROM settings")
+  const settings: Record<string, string> = {}
+  for (const r of settingsRows) {
+    settings[r.key] = r.value
+  }
+
+  const brandName = settings.brand_name || "Sin Límites"
+  const colorPrim = settings.color_primary || "#ff6600"
+  const logoUrl = settings.brand_logo || ""
+
+  const smtpHost = settings.smtp_host || process.env.SMTP_HOST
+  const smtpPort = parseInt(settings.smtp_port || process.env.SMTP_PORT || "587")
+  const smtpUser = settings.smtp_user || process.env.SMTP_USER
+  const smtpPass = settings.smtp_pass || process.env.SMTP_PASS
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    throw new Error("SMTP no configurado. Por favor, completa la configuración SMTP en Ajustes de Marca.")
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass
+    }
+  })
+
+  const emailHTML = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #334155;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        ${logoUrl ? `<img src="${logoUrl}" alt="${brandName}" style="max-height: 48px; object-fit: contain; max-width: 100%;" />` : `<h2 style="color: ${colorPrim}; margin: 0;">${brandName}</h2>`}
+      </div>
+      <h2 style="color: #0f172a; border-bottom: 2px solid ${colorPrim}; padding-bottom: 10px; margin-top: 0; font-size: 20px; text-align: center;">Correo de Prueba Exitoso</h2>
+      <p>Hola,</p>
+      <p>¡Felicidades! Este es un correo de prueba enviado desde tu panel administrativo de <strong>${brandName}</strong>.</p>
+      <p>Esto confirma que las credenciales de tu servidor de correo SMTP se han configurado correctamente y están listas para enviar recordatorios de cobro y notificaciones de morosidad automatizadas.</p>
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0;" />
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
+        Enviado por la plataforma de ${brandName}.
+      </p>
+    </div>
+  `
+
+  await transporter.sendMail({
+    from: `"${brandName}" <${smtpUser}>`,
+    to: toEmail,
+    subject: `Correo de prueba SMTP - ${brandName}`,
+    html: emailHTML
+  })
+}
+
+export async function sendProposalEmail(proposalId: string): Promise<void> {
+  const db = await getDb()
+  const proposal = await db.get<Proposal>("SELECT * FROM proposals WHERE id = ?", [proposalId])
+  if (!proposal) {
+    throw new Error("Contrato no encontrado")
+  }
+
+  const settingsRows = await db.all<{ key: string; value: string }[]>("SELECT * FROM settings")
+  const settings: Record<string, string> = {}
+  for (const r of settingsRows) {
+    settings[r.key] = r.value
+  }
+
+  const brandName = settings.brand_name || "Sin Límites"
+  const colorPrim = proposal.brand_color_primary || settings.color_primary || "#ff6600"
+  const logoUrl = proposal.brand_logo_url || settings.brand_logo || ""
+
+  const smtpHost = settings.smtp_host || process.env.SMTP_HOST
+  const smtpPort = parseInt(settings.smtp_port || process.env.SMTP_PORT || "587")
+  const smtpUser = settings.smtp_user || process.env.SMTP_USER
+  const smtpPass = settings.smtp_pass || process.env.SMTP_PASS
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    throw new Error("SMTP no configurado. Por favor, completa la configuración SMTP en Ajustes de Marca.")
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass
+    }
+  })
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const link = `${appUrl}/propuestas-dinamicas/${proposalId}`
+
+  const emailHTML = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; color: #334155;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        ${logoUrl ? `<img src="${logoUrl}" alt="${brandName}" style="max-height: 48px; object-fit: contain; max-width: 100%;" />` : `<h2 style="color: ${colorPrim}; margin: 0;">${brandName}</h2>`}
+      </div>
+      <h2 style="color: #0f172a; border-bottom: 2px solid ${colorPrim}; padding-bottom: 10px; margin-top: 0; font-size: 20px;">Propuesta Comercial de Servicios</h2>
+      <p>Estimado/a <strong>${proposal.client_name}</strong> de <strong>${proposal.client_company}</strong>,</p>
+      <p>Es un placer saludarle. Le escribimos de <strong>${brandName}</strong> para enviarle el enlace a la propuesta digital de servicios acordada.</p>
+      
+      <p>Le invitamos a revisar los detalles de los servicios, planes, tarifas y los términos comerciales haciendo clic en el siguiente enlace. Desde allí mismo podrá **firmar el contrato en línea** de manera fácil y rápida.</p>
+      
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="${link}" 
+           style="background-color: ${colorPrim}; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          Ver y Firmar Propuesta Comercial
+        </a>
+      </div>
+
+      <p>Si tiene alguna pregunta o requiere cualquier ajuste, no dude en responder a este correo.</p>
+      
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0;" />
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
+        Enviado por la plataforma de ${brandName}.
+      </p>
+    </div>
+  `
+
+  await transporter.sendMail({
+    from: `"${brandName}" <${smtpUser}>`,
+    to: proposal.client_domain || smtpUser,
+    subject: `Propuesta de Servicios Comerciales - ${proposal.client_company}`,
+    html: emailHTML
+  })
 }
 
 

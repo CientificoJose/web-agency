@@ -23,7 +23,9 @@ import {
   Credential,
   updateCategory,
   updateService,
-  updateServicePlan
+  updateServicePlan,
+  sendTestEmail,
+  sendProposalEmail
 } from "@/lib/actions"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -148,6 +150,11 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
   const [smtpPort, setSmtpPort] = useState("")
   const [smtpUser, setSmtpUser] = useState("")
   const [smtpPass, setSmtpPass] = useState("")
+
+  // Estados para envío de correos y pruebas
+  const [testEmailRecipient, setTestEmailRecipient] = useState("")
+  const [isSendingTest, setIsSendingTest] = useState(false)
+  const [isSendingProposal, setIsSendingProposal] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     getSettings().then(data => {
@@ -398,6 +405,32 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
 
   return (
     <div className="container mx-auto p-6 max-w-6xl text-slate-100">
+      <style dangerouslySetInnerHTML={{ __html: `
+        :root {
+          --primary-admin: ${colorPrim || '#ff6600'};
+          --secondary-admin: ${colorSec || '#0f172a'};
+        }
+        
+        /* Clases personalizadas de branding admin */
+        .text-admin-primary { color: var(--primary-admin) !important; }
+        .bg-admin-primary { background-color: var(--primary-admin) !important; }
+        .border-admin-primary { border-color: var(--primary-admin) !important; }
+        .hover\\:bg-admin-primary-hover:hover { background-color: var(--primary-admin) !important; filter: brightness(90%); }
+        
+        /* Sobrescribir clases específicas de Tailwind */
+        .text-primary { color: var(--primary-admin) !important; }
+        .border-primary { border-color: var(--primary-admin) !important; }
+        .bg-primary { background-color: var(--primary-admin) !important; }
+        .hover\\:bg-primary\\/90:hover { background-color: var(--primary-admin) !important; filter: brightness(90%); }
+        .focus\\:ring-primary:focus { --tw-ring-color: var(--primary-admin) !important; }
+        .focus-visible\\:ring-primary:focus-visible { --tw-ring-color: var(--primary-admin) !important; }
+        
+        /* Ajustar tabs activos de Radix UI */
+        [data-state="active"] {
+          border-color: var(--primary-admin) !important;
+          color: var(--primary-admin) !important;
+        }
+      `}} />
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white font-sans flex items-center gap-3">
@@ -539,17 +572,45 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
                                     <Pencil className="h-4 w-4" />
                                   </Button>
                                 </Link>
-                                <Button
-                                  size="icon"
-                                  variant="destructive"
-                                  className="bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer"
-                                  title="Eliminar"
-                                  onClick={() => handleDeleteProposal(prop.id)}
-                                  disabled={isPending}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                                 <Button
+                                   size="icon"
+                                   variant="outline"
+                                   className="border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white cursor-pointer bg-slate-950"
+                                   title="Enviar Propuesta por Correo"
+                                   disabled={isSendingProposal[prop.id] || isPending}
+                                   onClick={async () => {
+                                     const confirmSend = window.confirm(`¿Estás seguro de enviar la propuesta de servicios a ${prop.client_name} por correo?`)
+                                     if (!confirmSend) return
+                                     
+                                     setIsSendingProposal(prev => ({ ...prev, [prop.id]: true }))
+                                     try {
+                                       await sendProposalEmail(prop.id)
+                                       toast.success("¡Propuesta enviada por correo con éxito!")
+                                     } catch (err: any) {
+                                       console.error(err)
+                                       toast.error(err.message || "Error al enviar la propuesta.")
+                                     } finally {
+                                       setIsSendingProposal(prev => ({ ...prev, [prop.id]: false }))
+                                     }
+                                   }}
+                                 >
+                                   {isSendingProposal[prop.id] ? (
+                                     <Loader2 className="h-4 w-4 animate-spin" />
+                                   ) : (
+                                     <Mail className="h-4 w-4" />
+                                   )}
+                                 </Button>
+                                 <Button
+                                   size="icon"
+                                   variant="destructive"
+                                   className="bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer"
+                                   title="Eliminar"
+                                   onClick={() => handleDeleteProposal(prop.id)}
+                                   disabled={isPending}
+                                 >
+                                   <Trash2 className="h-4 w-4" />
+                                 </Button>
+                               </div>
                             </TableCell>
                           </TableRow>
                         )
@@ -954,13 +1015,37 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">URL del Logotipo (Marca Blanca)</Label>
-                    <Input
-                      placeholder="Ej. /mi-logo.png o https://..."
-                      value={brandLogo}
-                      onChange={e => setBrandLogo(e.target.value)}
-                      className="bg-slate-900 border-slate-800"
-                    />
+                    <Label className="text-slate-300">Logotipo de la Marca (Subir imagen o URL)</Label>
+                    <div className="flex gap-3 items-center">
+                      {brandLogo && (
+                        <div className="h-10 w-10 border border-slate-800 rounded bg-slate-900 flex items-center justify-center p-1 flex-shrink-0">
+                          <img src={brandLogo} alt="Logo" className="h-full w-full object-contain" />
+                        </div>
+                      )}
+                      <div className="flex-1 flex gap-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                setBrandLogo(reader.result as string)
+                              }
+                              reader.readAsDataURL(file)
+                            }
+                          }}
+                          className="bg-slate-900 border-slate-800 text-xs py-1 cursor-pointer flex-1"
+                        />
+                        <Input
+                          placeholder="O URL directa..."
+                          value={brandLogo.startsWith("data:") ? "" : brandLogo}
+                          onChange={e => setBrandLogo(e.target.value)}
+                          className="bg-slate-900 border-slate-800 text-xs w-1/3"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -1003,7 +1088,7 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
                 <div className="border-t border-slate-900 pt-6">
                   <h3 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
                     <Mail className="h-4 w-4 text-primary" />
-                    Configuración de Servidor SMTP (Para Email Recordatorios)
+                    Configuración de Servidor SMTP (Para Email Recordatorios y Envío de Propuestas)
                   </h3>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -1042,6 +1127,81 @@ export default function AdminPropuestasClient({ proposals, initialCatalog }: Adm
                         onChange={e => setSmtpPass(e.target.value)}
                         className="bg-slate-900 border-slate-800"
                       />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email Test and Preview */}
+                <div className="border-t border-slate-900 pt-6 space-y-4">
+                  <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-primary" />
+                    Vista Previa de Correo y Envío de Prueba
+                  </h3>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {/* Formulario de Correo de prueba */}
+                    <div className="bg-slate-900/40 p-4 border border-slate-800 rounded-lg space-y-3 flex flex-col justify-center">
+                      <Label className="text-slate-300">Enviar correo de prueba</Label>
+                      <p className="text-xs text-slate-400">Verifica la conexión SMTP enviando un correo de prueba ahora mismo.</p>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ej. tu-correo@dominio.com"
+                          value={testEmailRecipient}
+                          onChange={e => setTestEmailRecipient(e.target.value)}
+                          className="bg-slate-900 border-slate-800 text-xs h-9"
+                        />
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!testEmailRecipient) {
+                              toast.error("Por favor, ingresa un correo destinatario.")
+                              return
+                            }
+                            setIsSendingTest(true)
+                            try {
+                              await sendTestEmail(testEmailRecipient)
+                              toast.success("¡Correo de prueba enviado con éxito!")
+                            } catch (err: any) {
+                              console.error(err)
+                              toast.error(err.message || "Error al enviar el correo de prueba.")
+                            } finally {
+                              setIsSendingTest(false)
+                            }
+                          }}
+                          className="bg-primary text-white hover:bg-primary/90 text-xs h-9 cursor-pointer flex-shrink-0"
+                          disabled={isSendingTest}
+                        >
+                          {isSendingTest ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                          Enviar Test
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Visor de Plantilla de Correo */}
+                    <div className="border border-slate-800 rounded-lg overflow-hidden bg-white text-slate-700 shadow-lg text-[10px] w-full">
+                      <div className="bg-slate-100 p-2 text-slate-500 border-b flex justify-between items-center text-[9px] font-sans">
+                        <span>Para: cliente@ejemplo.com</span>
+                        <span>Asunto: Propuesta de Servicios - [Empresa]</span>
+                      </div>
+                      <div className="p-4 space-y-4 max-w-md mx-auto font-sans">
+                        <div className="text-center">
+                          {brandLogo ? (
+                            <img src={brandLogo} alt="Logo" className="max-h-8 object-contain mx-auto" />
+                          ) : (
+                            <h4 style={{ color: colorPrim || '#ff6600' }} className="margin-0 font-bold text-sm">{brandName}</h4>
+                          )}
+                        </div>
+                        <div style={{ borderTop: `2px solid ${colorPrim || '#ff6600'}` }} className="pt-2">
+                          <p className="font-bold text-slate-900 mb-1 text-xs">Propuesta Comercial de Servicios</p>
+                          <p className="leading-relaxed">Estimado cliente, le invitamos a revisar los detalles de los servicios y planes cotizados haciendo clic en el siguiente enlace para firmar en línea:</p>
+                        </div>
+                        <div className="text-center py-1">
+                          <span style={{ backgroundColor: colorPrim || '#ff6600' }} className="text-white px-3 py-1.5 rounded text-[9px] font-bold inline-block shadow-sm">
+                            Ver y Firmar Propuesta Comercial
+                          </span>
+                        </div>
+                        <p className="text-[8px] text-slate-400 text-center border-t pt-2">Enviado por la plataforma de {brandName}.</p>
+                      </div>
                     </div>
                   </div>
                 </div>

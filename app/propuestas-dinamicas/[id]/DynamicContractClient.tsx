@@ -394,17 +394,20 @@ export default function DynamicContractClient({
                             </div>
                           )}
 
-                          {/* Políticas de Plan */}
-                          {ser.policies && (
-                            <div className="mb-2 p-2 bg-slate-50 rounded text-[11px] text-slate-500 italic border border-slate-100">
-                              * Políticas del Plan: {ser.policies}
-                            </div>
-                          )}
-
-                          {/* Políticas de Categoría */}
-                          {ser.category_policies && (
-                            <div className="mb-4 p-2 bg-slate-50 rounded text-[11px] text-slate-500 italic border border-slate-100">
-                              * Términos de {ser.category_name}: {ser.category_policies}
+                          {/* Términos y Condiciones Concatenados */}
+                          {(ser.category_policies || ser.policies) && (
+                            <div className="mb-4 p-3 bg-slate-50 rounded-lg text-[11px] text-slate-600 border border-slate-200/60 space-y-1.5">
+                              <h5 className="font-bold text-slate-800 text-[10px] uppercase tracking-wider">Términos y Condiciones:</h5>
+                              {ser.category_policies && (
+                                <div>
+                                  <span className="font-semibold text-slate-700">• Términos de {ser.category_name} (SLA):</span> {ser.category_policies}
+                                </div>
+                              )}
+                              {ser.policies && (
+                                <div>
+                                  <span className="font-semibold text-slate-700">• Especificaciones del Plan ({ser.plan_name}):</span> {ser.policies}
+                                </div>
+                              )}
                             </div>
                           )}
 
@@ -463,6 +466,31 @@ export default function DynamicContractClient({
                                 <span>Contraseña:</span>
                                 <span className="font-mono text-slate-800 font-semibold select-all">{cred.password}</span>
                               </div>
+
+                              {/* Campos Dinámicos */}
+                              {(() => {
+                                try {
+                                  if (cred.dynamic_fields) {
+                                    const parsed = JSON.parse(cred.dynamic_fields)
+                                    return Object.entries(parsed).map(([key, value]) => (
+                                      <div key={key} className="flex justify-between text-slate-500 border-t border-slate-100 pt-1.5">
+                                        <span>{key}:</span>
+                                        <span className="font-mono text-slate-800 font-semibold select-all">{String(value)}</span>
+                                      </div>
+                                    ))
+                                  }
+                                } catch (e) {
+                                  console.error(e)
+                                }
+                                return null
+                              })()}
+
+                              {/* Notas de Acceso */}
+                              {cred.notes && (
+                                <div className="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 italic bg-slate-50/50 p-2 rounded">
+                                  <strong>Nota:</strong> {cred.notes}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -578,17 +606,20 @@ export default function DynamicContractClient({
                         </div>
                       )}
 
-                      {/* Políticas de Plan */}
-                      {ser.policies && (
-                        <div className="mt-2 p-2 bg-slate-50 border border-slate-100 rounded text-xs text-slate-500 italic">
-                          Términos del plan: {ser.policies}
-                        </div>
-                      )}
-
-                      {/* Políticas de Categoría */}
-                      {ser.category_policies && (
-                        <div className="mt-3 p-2 bg-slate-50 border border-slate-100 rounded text-xs text-slate-500 italic">
-                          Términos de la categoría ({ser.category_name}): {ser.category_policies}
+                      {/* Términos y Condiciones Concatenados */}
+                      {(ser.category_policies || ser.policies) && (
+                        <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg text-xs text-slate-600 space-y-1.5">
+                          <h5 className="font-bold text-slate-800 text-[10px] uppercase tracking-wider">Términos y Condiciones:</h5>
+                          {ser.category_policies && (
+                            <div>
+                              <span className="font-semibold text-slate-700">• Términos de {ser.category_name} (SLA):</span> {ser.category_policies}
+                            </div>
+                          )}
+                          {ser.policies && (
+                            <div>
+                              <span className="font-semibold text-slate-700">• Especificaciones del Plan ({ser.plan_name}):</span> {ser.policies}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

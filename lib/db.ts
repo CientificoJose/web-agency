@@ -208,6 +208,8 @@ export async function getDb() {
       description TEXT,
       email TEXT NOT NULL,
       password TEXT NOT NULL,
+      notes TEXT,
+      dynamic_fields TEXT,
       FOREIGN KEY (proposal_id) REFERENCES proposals (id) ON DELETE CASCADE
     )
   `)
@@ -257,6 +259,17 @@ export async function getDb() {
   const hasPoliciesInCategories = categoriesColumns.some((col: any) => col.name === "policies")
   if (!hasPoliciesInCategories) {
     await dbInstance.run("ALTER TABLE categories ADD COLUMN policies TEXT DEFAULT ''")
+  }
+
+  // Migración en caliente: Añadir columnas notes y dynamic_fields a credentials si no existen
+  const credentialsColumns = await dbInstance.all("PRAGMA table_info(credentials)")
+  const hasNotesInCredentials = credentialsColumns.some((col: any) => col.name === "notes")
+  if (!hasNotesInCredentials) {
+    await dbInstance.run("ALTER TABLE credentials ADD COLUMN notes TEXT")
+  }
+  const hasDynamicFieldsInCredentials = credentialsColumns.some((col: any) => col.name === "dynamic_fields")
+  if (!hasDynamicFieldsInCredentials) {
+    await dbInstance.run("ALTER TABLE credentials ADD COLUMN dynamic_fields TEXT")
   }
 
   // Insertar datos semilla (Seeds) si las categorías están vacías

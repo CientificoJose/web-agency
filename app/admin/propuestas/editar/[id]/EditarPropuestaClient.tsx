@@ -131,11 +131,37 @@ export default function EditarPropuestaClient({
   const [collaborators, setCollaborators] = useState<ProposalCollaborator[]>(initialCollaborators)
 
   // Credenciales
-  const [credentials, setCredentials] = useState<Credential[]>(
-    initialCredentials.length > 0
-      ? initialCredentials
-      : [{ description: "Cuenta de Administración", email: "", password: "" }]
-  )
+  interface CredentialState {
+    description: string
+    email: string
+    password: string
+    notes: string
+    fields: { key: string; value: string }[]
+  }
+
+  const [credentials, setCredentials] = useState<CredentialState[]>(() => {
+    if (initialCredentials && initialCredentials.length > 0) {
+      return initialCredentials.map(c => {
+        let fields: { key: string; value: string }[] = []
+        try {
+          if (c.dynamic_fields) {
+            const parsed = JSON.parse(c.dynamic_fields)
+            fields = Object.entries(parsed).map(([key, value]) => ({ key, value: String(value) }))
+          }
+        } catch (e) {
+          console.error("Error parsing dynamic fields", e)
+        }
+        return {
+          description: c.description || "",
+          email: c.email || "",
+          password: c.password || "",
+          notes: c.notes || "",
+          fields
+        }
+      })
+    }
+    return [{ description: "Cuenta de Administración", email: "", password: "", notes: "", fields: [] }]
+  })
 
   // Cargar IDs de catálogo basados en los nombres pre-cargados
   useEffect(() => {
@@ -326,16 +352,34 @@ export default function EditarPropuestaClient({
 
   // Credenciales
   const handleAddCredential = () => {
-    setCredentials([...credentials, { description: "", email: "", password: "" }])
+    setCredentials([...credentials, { description: "", email: "", password: "", notes: "", fields: [] }])
   }
 
   const handleRemoveCredential = (index: number) => {
     setCredentials(credentials.filter((_, i) => i !== index))
   }
 
-  const handleCredentialChange = (index: number, key: keyof Credential, value: string) => {
+  const handleCredentialChange = (index: number, key: keyof CredentialState, value: any) => {
     const updated = [...credentials]
-    updated[index] = { ...updated[index], [key]: value }
+    updated[index] = { ...updated[index], [key]: value } as any
+    setCredentials(updated)
+  }
+
+  const handleAddCredentialField = (credIndex: number) => {
+    const updated = [...credentials]
+    updated[credIndex].fields.push({ key: "", value: "" })
+    setCredentials(updated)
+  }
+
+  const handleRemoveCredentialField = (credIndex: number, fieldIndex: number) => {
+    const updated = [...credentials]
+    updated[credIndex].fields = updated[credIndex].fields.filter((_, i) => i !== fieldIndex)
+    setCredentials(updated)
+  }
+
+  const handleCredentialFieldChange = (credIndex: number, fieldIndex: number, key: 'key' | 'value', value: string) => {
+    const updated = [...credentials]
+    updated[credIndex].fields[fieldIndex][key] = value
     setCredentials(updated)
   }
 
@@ -390,7 +434,18 @@ export default function EditarPropuestaClient({
           late_fee_percentage: parseFloat(lateFeePercentage) || 0,
           daily_penalty_fee: parseFloat(dailyPenaltyFee) || 0
         },
-        credentials.filter(c => c.email && c.password),
+        credentials
+          .filter(c => c.email && c.password)
+          .map(c => ({
+            description: c.description,
+            email: c.email,
+            password: c.password,
+            notes: c.notes,
+            dynamic_fields: JSON.stringify(c.fields.reduce((acc, curr) => {
+              if (curr.key.trim()) acc[curr.key.trim()] = curr.value
+              return acc
+            }, {} as Record<string, string>))
+          })),
         mappedServices,
         collaborators.filter(c => c.name)
       )
@@ -975,48 +1030,118 @@ export default function EditarPropuestaClient({
               Agregar
             </Button>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {credentials.map((cred, index) => (
-              <div key={index} className="flex flex-col md:flex-row gap-3 p-4 border border-slate-800 rounded-lg bg-slate-900/30 relative">
-                <div className="flex-1 space-y-2">
-                  <Label className="text-slate-300">Descripción de la cuenta</Label>
-                  <Input
-                    placeholder="Ej. Cuenta de Gerencia"
-                    value={cred.description}
-                    onChange={e => handleCredentialChange(index, "description", e.target.value)}
-                    className="bg-slate-900 border-slate-800"
+              <div key={index} className="p-5 border border-slate-800 rounded-xl bg-slate-900/10 space-y-4 relative">
+                
+                {/* Cabecera de la cuenta y botón Eliminar */}
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <h4 className="font-bold text-sm text-primary">Credencial #{index + 1}</h4>
+                  {credentials.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer h-7 text-xs"
+                      onClick={() => handleRemoveCredential(index)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Eliminar Cuenta
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs">Descripción / Nombre</Label>
+                    <Input
+                      placeholder="Ej. Hosting de Producción"
+                      value={cred.description}
+                      onChange={e => handleCredentialChange(index, "description", e.target.value)}
+                      className="bg-slate-900 border-slate-800 text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs">Email / Usuario Principal *</Label>
+                    <Input
+                      placeholder="Ej. admin@tumarca.com"
+                      value={cred.email}
+                      onChange={e => handleCredentialChange(index, "email", e.target.value)}
+                      className="bg-slate-900 border-slate-800 text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs">Contraseña Principal *</Label>
+                    <Input
+                      placeholder="Ej. ClaveSecreta123"
+                      value={cred.password}
+                      onChange={e => handleCredentialChange(index, "password", e.target.value)}
+                      className="bg-slate-900 border-slate-800 text-xs h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* CAMPOS PERSONALIZADOS REPETIDOR */}
+                <div className="space-y-3 pt-2 border-t border-slate-900/50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-400">Campos Adicionales / Personalizados</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddCredentialField(index)}
+                      className="h-7 text-[10px] border-slate-800 bg-slate-950 hover:bg-slate-900 text-slate-300 cursor-pointer"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Agregar Campo
+                    </Button>
+                  </div>
+
+                  {cred.fields.length === 0 ? (
+                    <p className="text-[10px] text-slate-500 italic">No se han agregado campos personalizados.</p>
+                  ) : (
+                    <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                      {cred.fields.map((fld, fldIdx) => (
+                        <div key={fldIdx} className="flex gap-2 items-center bg-slate-900/20 p-2 rounded-lg border border-slate-900/40">
+                          <Input
+                            placeholder="Ej. Servidor"
+                            value={fld.key}
+                            onChange={e => handleCredentialFieldChange(index, fldIdx, "key", e.target.value)}
+                            className="bg-slate-900 border-slate-800 text-xs h-8 w-1/3"
+                          />
+                          <Input
+                            placeholder="Ej. mail.tumarca.com"
+                            value={fld.value}
+                            onChange={e => handleCredentialFieldChange(index, fldIdx, "value", e.target.value)}
+                            className="bg-slate-900 border-slate-800 text-xs h-8 flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveCredentialField(index, fldIdx)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-950/20 h-7 w-7 cursor-pointer"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* NOTAS / COMENTARIOS */}
+                <div className="space-y-1.5 pt-2 border-t border-slate-900/50">
+                  <Label className="text-slate-300 text-xs">Nota de Acceso / Comentario Instructivo</Label>
+                  <textarea
+                    placeholder="Escribe aquí cualquier aclaración, instrucción, URL del panel de control o nota importante..."
+                    value={cred.notes}
+                    onChange={e => handleCredentialChange(index, "notes", e.target.value)}
+                    rows={2}
+                    className="w-full rounded-md border border-slate-800 bg-slate-900 p-2.5 text-xs text-white focus:ring-1 focus:ring-primary font-sans leading-relaxed"
                   />
                 </div>
-                <div className="flex-1 space-y-2">
-                  <Label className="text-slate-300">Email *</Label>
-                  <Input
-                    type="email"
-                    placeholder="Ej. gerencia@tumarca.com"
-                    value={cred.email}
-                    onChange={e => handleCredentialChange(index, "email", e.target.value)}
-                    className="bg-slate-900 border-slate-800"
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label className="text-slate-300">Contraseña *</Label>
-                  <Input
-                    placeholder="Ej. Contrasena123*"
-                    value={cred.password}
-                    onChange={e => handleCredentialChange(index, "password", e.target.value)}
-                    className="bg-slate-900 border-slate-800"
-                  />
-                </div>
-                {credentials.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="self-end md:mb-1 bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-900/60 cursor-pointer"
-                    onClick={() => handleRemoveCredential(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+
               </div>
             ))}
           </CardContent>
